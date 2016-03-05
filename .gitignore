@@ -3,6 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# PyCharm Project stuff
+**/.idea/workspace.xml
+**/.idea/tasks.xml
+
 # C extensions
 *.so
 
