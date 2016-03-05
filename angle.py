@@ -1,9 +1,13 @@
 '''
-Documentation: Yet to be done.
+Class to represent an angle.  It hides the overhead
+of converting between radians and other representations
+of angle, providing wrappers for the basic trig
+functions.
 '''
 import math
 
 twoPi = 2 * math.pi
+piOver2 = math.pi / 2.0
 
 def RadiansToDegreesDouble(radians):
     return 180.0 * radians / math.pi
