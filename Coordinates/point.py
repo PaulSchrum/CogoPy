@@ -4,6 +4,7 @@ Z will be None for 2D points.
 '''
 from iBoundingBoxed import IBoundingBoxed
 from boundingBox import BoundingBox
+from _helpers import nearlyEqual
 
 #equalityTolerance - for comparing floats within the point
 equalityTolerance = 0.00005
@@ -68,4 +69,5 @@ class Point(IBoundingBoxed):
         return (dx2 + dy2 + dz2)**0.5
 
     def __eq__(self, other):
-        return self.distanceTo(other) < equalityTolerance
+        return nearlyEqual(self.distanceTo(other), 0.0, equalityTolerance)
+        # return self.distanceTo(other) < equalityTolerance

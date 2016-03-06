@@ -9,7 +9,7 @@ import math
 twoPi = 2 * math.pi
 piOver2 = math.pi / 2.0
 
-def RadiansToDegreesDouble(radians):
+def RadiansToDegreesFloat(radians):
     return 180.0 * radians / math.pi
 
 class Angle:
@@ -33,8 +33,8 @@ class Angle:
     def asRadians(self):
         return self._angle
 
-    def asDegreesDouble(self):
-        return RadiansToDegreesDouble(self._angle)
+    def asDegreesFloat(self):
+        return RadiansToDegreesFloat(self._angle)
 
     def sin(self):
         return math.sin(self._angle)

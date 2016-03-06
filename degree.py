@@ -8,10 +8,10 @@ class Degree:
     def __init__(self, newValue):
         self._degrees = newValue
 
-    def asRadiansDouble(self):
+    def asRadiansFloat(self):
         return self._degrees * math.pi / 180.0
 
-    def asDegreesDouble(self):
+    def asDegreesFloat(self):
         return self._degrees
 
     @staticmethod
