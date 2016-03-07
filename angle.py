@@ -20,22 +20,23 @@ class Angle:
         :return: new instance of Angle
         '''
         if isinstance(doubleValue, Degree):
-            self._angle = doubleValue.asRadiansFloat()
+            self.__angle = doubleValue.asRadiansFloat()
         else:
-            self._angle = doubleValue
+            self.__angle = doubleValue
         self._normalize()
 
     @property
-    def angle(self):
+    def _angle(self):
         return self.__angle
 
-    @angle.setter
+    @_angle.setter
     def angle(self, val):
         self.__angle = val
+        self._normalize()
 
 
     def _normalize(self):
-        self._angle = math.atan2(math.sin(self._angle), math.cos(self._angle))
+        self.__angle = math.atan2(math.sin(self.__angle), math.cos(self.__angle))
 
 
     @staticmethod

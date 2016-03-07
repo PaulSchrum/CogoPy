@@ -38,6 +38,7 @@ class TestAngle(TestCase):
         self.assertTrue(nearlyEqual(angle1.asDegreesFloat(), 180.0))
 
         angle1 = Angle.factory(Degree(190.0))
+        deg = angle1.asDegreesFloat()
         self.assertTrue(nearlyEqual(angle1.asDegreesFloat(), -170.0))
 
         angle1 = Angle.factory(Degree(350.0))
