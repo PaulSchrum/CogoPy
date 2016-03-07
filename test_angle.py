@@ -9,12 +9,12 @@ class TestAngle(TestCase):
 
     def test_init(self):
         a = Angle(twoPi / 8.0)
-        degDbl = a.asDegreesDouble()
+        degDbl = a.asDegreesFloat()
         self.assertTrue(degDbl == 45.0)
 
     def test_factory_passIn_xAndy(self):
         a = Angle.factory(10.0, 10.0)
-        degDbl = a.asDegreesDouble()
+        degDbl = a.asDegreesFloat()
         self.assertTrue(degDbl == 45.0)
 
     def test_factory_passInDuckPoints(self):
@@ -25,7 +25,7 @@ class TestAngle(TestCase):
         p2.X = 10.0
         p2.Y = 10.0
         a = Angle.factory(p1, p2)
-        degDbl = a.asDegreesDouble()
+        degDbl = a.asDegreesFloat()
         self.assertTrue(degDbl == 45.0)
 
 
