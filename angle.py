@@ -5,6 +5,7 @@ of angle, providing wrappers for the basic trig
 functions.
 '''
 import math
+from degree import Degree
 
 twoPi = 2 * math.pi
 piOver2 = math.pi / 2.0
@@ -14,7 +15,28 @@ def RadiansToDegreesFloat(radians):
 
 class Angle:
     def __init__(self, doubleValue = 0.0):
-        self._angle = doubleValue
+        '''
+        :param doubleValue: float (interpreted as Radians) or Degree
+        :return: new instance of Angle
+        '''
+        if isinstance(doubleValue, Degree):
+            self._angle = doubleValue.asRadiansFloat()
+        else:
+            self._angle = doubleValue
+        self._normalize()
+
+    @property
+    def angle(self):
+        return self.__angle
+
+    @angle.setter
+    def angle(self, val):
+        self.__angle = val
+
+
+    def _normalize(self):
+        self._angle = math.atan2(math.sin(self._angle), math.cos(self._angle))
+
 
     @staticmethod
     def factory(a, b=None):

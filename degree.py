@@ -5,6 +5,9 @@ import math
 
 
 class Degree:
+    '''
+    Makes a float value have units of Degrees (1/360th of a circle).
+    '''
     def __init__(self, newValue):
         self._degrees = newValue
 

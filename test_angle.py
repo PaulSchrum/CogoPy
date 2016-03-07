@@ -1,7 +1,9 @@
 from unittest import TestCase
 from angle import *
+from degree import Degree
 import math
 import mock
+from _helpers import *
 
 class TestAngle(TestCase):
     def test_twoPi(self):
@@ -27,5 +29,29 @@ class TestAngle(TestCase):
         a = Angle.factory(p1, p2)
         degDbl = a.asDegreesFloat()
         self.assertTrue(degDbl == 45.0)
+
+    def test_inputAnglesOutsideNorms(self):
+        angle1 = Angle.factory(Degree(45.0))
+        self.assertTrue(nearlyEqual(angle1.asDegreesFloat(), 45.0))
+
+        angle1 = Angle.factory(Degree(180.0))
+        self.assertTrue(nearlyEqual(angle1.asDegreesFloat(), 180.0))
+
+        angle1 = Angle.factory(Degree(190.0))
+        self.assertTrue(nearlyEqual(angle1.asDegreesFloat(), -170.0))
+
+        angle1 = Angle.factory(Degree(350.0))
+        self.assertTrue(nearlyEqual(angle1.asDegreesFloat(), -10.0))
+
+        angle1 = Angle.factory(Degree(370.0))
+        self.assertTrue(nearlyEqual(angle1.asDegreesFloat(), 10.0))
+
+        angle1 = Angle.factory(Degree(710.0))
+        self.assertTrue(nearlyEqual(angle1.asDegreesFloat(), -10.0))
+
+        angle1 = Angle.factory(Degree(-710.0))
+        self.assertTrue(nearlyEqual(angle1.asDegreesFloat(), 10.0))
+
+
 
 
