@@ -1,6 +1,7 @@
 from unittest import TestCase
 from angle import *
 from degree import Degree
+import degree
 import math
 import mock
 from _helpers import *
@@ -53,6 +54,17 @@ class TestAngle(TestCase):
         angle1 = Angle.factory(Degree(-710.0))
         self.assertTrue(nearlyEqual(angle1.asDegreesFloat(), 10.0))
 
+    def test_getAsDMS(self):
+        angl_ = Angle(Degree(10,3,5))
+        expected = (10, 3, 5.0)
+        actual = angl_.asDMS()
+        self.assertEqual(expected[0],actual[0])
+        self.assertEqual(expected[1],actual[1])
+        self.assertAlmostEqual(actual[2], expected[2], 5)
 
-
+    def test_getAsDMSstring(self):
+        deg = Angle(Degree(16,30,24))
+        expected = '16' + degree.degree_sign + " 30' "+  '24.0"'
+        actual = deg.asDMSstring()
+        self.assertEqual(expected, actual)
 

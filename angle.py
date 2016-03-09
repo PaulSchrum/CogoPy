@@ -59,6 +59,14 @@ class Angle(object):
     def asDegreesFloat(self):
         return RadiansToDegreesFloat(self._angle)
 
+    def asDMS(self):
+        retDeg = Degree.factoryFromRadians(self._angle)
+        return retDeg.asDMS()
+
+    def asDMSstring(self):
+        retDeg = Degree.factoryFromRadians(self._angle)
+        return retDeg.asDMSstring()
+
     def sin(self):
         return math.sin(self._angle)
 
