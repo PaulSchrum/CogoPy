@@ -21,7 +21,7 @@ class Azimuth(Angle):
     :param doubleValue: float (interpreted as Radians) or Degree
     :return: new instance of Azimuth
     """
-    def __init__(self, inputParam):
+    def __init__(self, inputParam=None):
         if inputParam is None:
             self.__angle = 0.0
         elif isinstance(inputParam, float):
