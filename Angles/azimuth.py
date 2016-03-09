@@ -26,6 +26,8 @@ class Azimuth(Angle):
             self.__angle = 0.0
         elif isinstance(inputParam, float):
             self.__angle = inputParam
+        elif isinstance(inputParam, int):
+            self.__angle = float(inputParam)
         else:
             self.__angle = inputParam.asRadiansFloat()
         self._normalize()
@@ -60,9 +62,42 @@ class Azimuth(Angle):
         # retVal = (math.pi / 2.0) - self.__angle
         return self.__angle
 
+    def asAngleFloat(self):
+        """
+        :return: value in Angle range (-pi -- pi) but of type Double
+        """
+        retAngle = (math.pi / 2.0) - self._angle
+        if retAngle > math.pi:
+            retAngle = (2.0 * math.pi) - retAngle
+        elif retAngle < -math.pi:
+            retAngle = (2.0 * math.pi) + retAngle
+        return retAngle
+
+    def asAngle(self):
+        retAngle = (math.pi / 2.0) - self._angle
+        return Angle(retAngle)
+
     def asDegreesFloat(self):
         degRad = RadiansToDegreesFloat(self._angle)
         return degRad
+
+    def sin(self):
+        """
+        :return: Sine of the Azimuth (float) as if it were Angle
+        """
+        return math.sin(self.asAngleFloat())
+
+    def cos(self):
+        """
+        :return: Cosine of the Azimuth (float) as if it were Angle
+        """
+        return math.cos(self.asAngleFloat())
+
+    def tan(self):
+        """
+        :return: Tangent of the Azimuth (float) as if it were Angle
+        """
+        return math.tan(self.asAngleFloat())
 
     @property
     def __repr__(self):

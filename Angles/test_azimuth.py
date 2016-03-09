@@ -32,3 +32,18 @@ class TestAzimuth(TestCase):
         deg = az1.asDegreesFloat()
         self.assertAlmostEqual(deg,10.0, 5)
 
+    def test_TrigFunctionsForAzimuth(self):
+        az1 = Azimuth(Degree(10.0))
+        expected = 0.984807753012
+        actual = az1.sin()
+        self.assertAlmostEqual(expected, actual, 5)
+
+        actual = az1.cos()
+        expected = 0.173648177667
+        self.assertAlmostEqual(expected, actual, 5)
+
+        actual = az1.tan()
+        expected = 5.67128181962
+        self.assertAlmostEqual(expected, actual, 5)
+
+
