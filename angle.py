@@ -13,16 +13,16 @@ piOver2 = math.pi / 2.0
 def RadiansToDegreesFloat(radians):
     return 180.0 * radians / math.pi
 
-class Angle:
-    def __init__(self, doubleValue = 0.0):
+class Angle(object):
+    def __init__(self, val = 0.0):
         '''
         :param doubleValue: float (interpreted as Radians) or Degree
         :return: new instance of Angle
         '''
-        if isinstance(doubleValue, Degree):
-            self.__angle = doubleValue.asRadiansFloat()
+        if isinstance(val, float):
+            self.__angle = val
         else:
-            self.__angle = doubleValue
+            self.__angle = val.asRadiansFloat()
         self._normalize()
 
     @property
@@ -30,7 +30,7 @@ class Angle:
         return self.__angle
 
     @_angle.setter
-    def angle(self, val):
+    def _angle(self, val):
         self.__angle = val
         self._normalize()
 
