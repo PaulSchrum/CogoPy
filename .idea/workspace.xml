@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="2f0200dc-7d63-4e00-9cbe-af7652cd2545" name="Default" comment="">
+    <list default="true" id="2f0200dc-7d63-4e00-9cbe-af7652cd2545" name="Default" comment="Refactored approach to _angle.&#10;1.  Renamed Property _angle to Property valu.&#10;2.  Renamed backing store variable from __angle to _angle&#10;3.  Removed all type checking and call to _normalize from __init__ and put it all in @valu.setter">
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Angles/deflection.py" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/Angles/test_deflection.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Angles/__init__.py" afterPath="$PROJECT_DIR$/Angles/__init__.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Angles/azimuth.py" afterPath="$PROJECT_DIR$/Angles/azimuth.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Angles/test_azimuth.py" afterPath="$PROJECT_DIR$/Angles/test_azimuth.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/angle.py" afterPath="$PROJECT_DIR$/angle.py" />
     </list>
     <ignored path="CogoPy.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -109,7 +107,7 @@
         <entry file="file://$PROJECT_DIR$/Angles/__init__.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="1" column="0" selection-start-line="1" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
+              <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -509,6 +507,13 @@
       <option name="number" value="Default" />
       <updated>1456874584761</updated>
     </task>
+    <task id="LOCAL-00001" summary="Refactored approach to _angle.&#10;1.  Renamed Property _angle to Property valu.&#10;2.  Renamed backing store variable from __angle to _angle&#10;3.  Removed all type checking and call to _normalize from __init__ and put it all in @valu.setter">
+      <created>1457581535908</created>
+      <option name="number" value="00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1457581535908</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TestHistory">
@@ -549,6 +554,7 @@
     <layout>
       <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2494469" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32900944" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32900944" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -579,6 +585,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="INCLUDE_TEXT_INTO_SHELF" value="true" />
+    <MESSAGE value="Refactored approach to _angle.&#10;1.  Renamed Property _angle to Property valu.&#10;2.  Renamed backing store variable from __angle to _angle&#10;3.  Removed all type checking and call to _normalize from __init__ and put it all in @valu.setter" />
+    <option name="LAST_COMMIT_MESSAGE" value="Refactored approach to _angle.&#10;1.  Renamed Property _angle to Property valu.&#10;2.  Renamed backing store variable from __angle to _angle&#10;3.  Removed all type checking and call to _normalize from __init__ and put it all in @valu.setter" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -762,7 +770,7 @@
     <entry file="file://$PROJECT_DIR$/Angles/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="1" column="0" selection-start-line="1" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
         </state>
       </provider>
