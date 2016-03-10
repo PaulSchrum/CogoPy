@@ -7,11 +7,11 @@ class TestAzimuth(TestCase):
     def test_createAzimuthNoParams(self):
         newAz = Azimuth()
         self.assertTrue(not newAz is None)
-        self.assertTrue(nearlyEqual(newAz._angle,0.0))
+        self.assertTrue(nearlyEqual(newAz.valu, 0.0))
 
     def test_createAzimuthFromFloat(self):
         newAz = Azimuth(1.0)
-        self.assertTrue(nearlyEqual(newAz._angle, 1.0))
+        self.assertTrue(nearlyEqual(newAz.valu, 1.0))
 
     def test_createAzimuthFromDegree(self):
         newAz = Azimuth(Degree(45.0))

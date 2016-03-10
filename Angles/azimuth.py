@@ -21,52 +21,55 @@ class Azimuth(Angle):
     :param doubleValue: float (interpreted as Radians) or Degree
     :return: new instance of Azimuth
     """
+    # Todo: Accept or return Azimuths a Degree-Minutes-Seconds
+    # Todo: Accept or return Azimuths as Bearings (DMS)
+
     def __init__(self, inputParam=None):
         if inputParam is None:
-            self.__angle = 0.0
+            self._angle = 0.0
         elif isinstance(inputParam, float):
-            self.__angle = inputParam
+            self._angle = inputParam
         elif isinstance(inputParam, int):
-            self.__angle = float(inputParam)
+            self._angle = float(inputParam)
         else:
-            self.__angle = inputParam.asRadiansFloat()
+            self._angle = inputParam.asRadiansFloat()
         self._normalize()
 
     @property
-    def _angle(self):
+    def valu(self):
         return self._getAsAzimuth()
 
-    @_angle.setter
+    @valu.setter
     def angle(self, val):
         if isinstance(val, float):
-            self.__angle = val
+            self._angle = val
         else:
-            self.__angle = val.asRadiansFloat()
+            self._angle = val.asRadiansFloat()
         self._normalize()
 
     def _normalize(self):
         """
-        Convert self.__angle from Angle to Azimuth.
+        Convert self._angle from Angle to Azimuth.
         Recommend that client code not call this method.
-        :Note: Upon entry __angle is interpreted as Angle (-pi -- pi), 0 is due east.
-            Upon exit __angle is interpreted as Azimuth (0 -- 2pi), 0 is due north.
+        :Note: Upon entry _angle is interpreted as Angle (-pi -- pi), 0 is due east.
+            Upon exit _angle is interpreted as Azimuth (0 -- 2pi), 0 is due north.
         :return: None
         """
-        __angle = (math.pi / 2.0) - self.__angle
+        __angle = (math.pi / 2.0) - self._angle
         __angle = math.atan2(math.sin(__angle), math.cos(__angle))
-        self.__angle = (math.pi / 2.0) - __angle
-        if self.__angle < 0.0:
-            self.__angle += 2.0 * math.pi
+        self._angle = (math.pi / 2.0) - __angle
+        if self._angle < 0.0:
+            self._angle += 2.0 * math.pi
 
     def _getAsAzimuth(self):
-        # retVal = (math.pi / 2.0) - self.__angle
-        return self.__angle
+        # retVal = (math.pi / 2.0) - self._angle
+        return self._angle
 
     def asAngleFloat(self):
         """
         :return: value in Angle range (-pi -- pi) but of type Double
         """
-        retAngle = (math.pi / 2.0) - self._angle
+        retAngle = (math.pi / 2.0) - self.valu
         if retAngle > math.pi:
             retAngle = (2.0 * math.pi) - retAngle
         elif retAngle < -math.pi:
@@ -74,11 +77,11 @@ class Azimuth(Angle):
         return retAngle
 
     def asAngle(self):
-        retAngle = (math.pi / 2.0) - self._angle
+        retAngle = (math.pi / 2.0) - self.valu
         return Angle(retAngle)
 
     def asDegreesFloat(self):
-        degRad = RadiansToDegreesFloat(self._angle)
+        degRad = RadiansToDegreesFloat(self.valu)
         return degRad
 
     def sin(self):
