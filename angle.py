@@ -19,24 +19,23 @@ class Angle(object):
         :param doubleValue: float (interpreted as Radians) or Degree
         :return: new instance of Angle
         '''
-        if isinstance(val, float):
-            self.__angle = val
-        else:
-            self.__angle = val.asRadiansFloat()
-        self._normalize()
+        self.valu = val
 
     @property
-    def _angle(self):
-        return self.__angle
+    def valu(self):
+        return self._angle
 
-    @_angle.setter
-    def _angle(self, val):
-        self.__angle = val
+    @valu.setter
+    def valu(self, val):
+        if isinstance(val, float):
+            self._angle = val
+        else:
+            self._angle = val.asRadiansFloat()
         self._normalize()
 
 
     def _normalize(self):
-        self.__angle = math.atan2(math.sin(self.__angle), math.cos(self.__angle))
+        self._angle = math.atan2(math.sin(self._angle), math.cos(self._angle))
 
 
     @staticmethod
@@ -54,25 +53,25 @@ class Angle(object):
         return Angle(math.atan2(dy, dx))
 
     def asRadians(self):
-        return self._angle
+        return self.valu
 
     def asDegreesFloat(self):
-        return RadiansToDegreesFloat(self._angle)
+        return RadiansToDegreesFloat(self.valu)
 
     def asDMS(self):
-        retDeg = Degree.factoryFromRadians(self._angle)
+        retDeg = Degree.factoryFromRadians(self.valu)
         return retDeg.asDMS()
 
     def asDMSstring(self):
-        retDeg = Degree.factoryFromRadians(self._angle)
+        retDeg = Degree.factoryFromRadians(self.valu)
         return retDeg.asDMSstring()
 
     def sin(self):
-        return math.sin(self._angle)
+        return math.sin(self.valu)
 
     def cos(self):
-        return math.cos(self._angle)
+        return math.cos(self.valu)
 
     def tan(self):
-        return math.tan(self._angle)
+        return math.tan(self.valu)
 
