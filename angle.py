@@ -27,7 +27,9 @@ class Angle(object):
 
     @valu.setter
     def valu(self, val):
-        if isinstance(val, float):
+        if val is None:
+            self._angle = 0.0
+        elif isinstance(val, float):
             self._angle = val
         else:
             self._angle = val.asRadiansFloat()

@@ -24,29 +24,6 @@ class Azimuth(Angle):
     # Todo: Accept or return Azimuths a Degree-Minutes-Seconds
     # Todo: Accept or return Azimuths as Bearings (DMS)
 
-    def __init__(self, inputParam=None):
-        if inputParam is None:
-            self._angle = 0.0
-        elif isinstance(inputParam, float):
-            self._angle = inputParam
-        elif isinstance(inputParam, int):
-            self._angle = float(inputParam)
-        else:
-            self._angle = inputParam.asRadiansFloat()
-        self._normalize()
-
-    @property
-    def valu(self):
-        return self._getAsAzimuth()
-
-    @valu.setter
-    def angle(self, val):
-        if isinstance(val, float):
-            self._angle = val
-        else:
-            self._angle = val.asRadiansFloat()
-        self._normalize()
-
     def _normalize(self):
         """
         Convert self._angle from Angle to Azimuth.
