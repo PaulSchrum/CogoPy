@@ -31,6 +31,8 @@ class Angle(object):
             self._angle = 0.0
         elif isinstance(val, float):
             self._angle = val
+        elif isinstance(val, int):
+            self._angle = float(val)
         else:
             self._angle = val.asRadiansFloat()
         self._normalize()

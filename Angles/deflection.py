@@ -5,6 +5,7 @@ Horizontal Cogo items all have a Deflection value.
 '''
 
 from angle import *
+# import azimuth
 
 class Deflection(Angle):
     '''
@@ -26,6 +27,14 @@ class Deflection(Angle):
                 self._angle += 2.0*math.pi
             elif self._angle > 0.0:
                 self._angle -= 2.0*math.pi
+
+# Todo: get Deflection addition to work. Problem is circular imports
+    # def __add__(self, azmuth):
+    #     if "<class 'azimuth.Azimuth'>" == str(type(azmuth)):
+    #         newAz = self.valu + azmuth.valu
+    #         return azimuth.Azimuth(newAz)
+    #     else:
+    #         raise NotImplementedError("Addition operation not supported for Deflection plus Angle or its children.  Use Deflection + Azimuth.")
 
 
 

@@ -9,10 +9,13 @@ Value 45.0 is north-east.
 Value 90.0 is due east.
 Value 180.0 is due south.
 Value 270.0 is due west.
++ deflections are clockwise.
+- deflections are counterclockwise
 '''
 from angle import Angle, RadiansToDegreesFloat
 from degree import Degree
 import math
+from deflection import Deflection as Deflection
 
 degree_sign= u'\N{DEGREE SIGN}'
 
@@ -23,6 +26,10 @@ class Azimuth(Angle):
     """
     # Todo: Accept or return Azimuths a Degree-Minutes-Seconds
     # Todo: Accept or return Azimuths as Bearings (DMS)
+
+    @Angle.valu.getter
+    def valu(self):
+        return self._getAsAzimuth()
 
     def _normalize(self):
         """
@@ -60,6 +67,13 @@ class Azimuth(Angle):
     def asDegreesFloat(self):
         degRad = RadiansToDegreesFloat(self.valu)
         return degRad
+
+    def __add__(self, deflction):
+        if isinstance(deflction, Deflection):
+            newAz = self.valu + deflction.valu
+            return Azimuth(newAz)
+        else:
+            raise NotImplementedError("Addition operation not supported for Azimuth plus Angle or its children.  Use Azimuth + Deflection.")
 
     def sin(self):
         """
