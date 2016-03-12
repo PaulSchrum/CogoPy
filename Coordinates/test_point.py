@@ -3,10 +3,7 @@ from math import fabs
 import Coordinates.point as point
 from _helpers import nearlyEqual
 
-_tol = 0.000005
-def _tolCompare(float1, float2):
-    dst = fabs(float2 - float1)
-    return dst < _tol
+_tol = 6
 
 class TestPoint(TestCase):
     def test_2DpointCreation_NoParams(self):
@@ -37,9 +34,9 @@ class TestPoint(TestCase):
         d1_2 = pt1.distanceTo(pt2)
         d3_4 = pt3.distanceTo(pt4)
         d1_3 = pt1.distanceTo(pt3)
-        self.assertTrue(nearlyEqual(1.41421356, d1_2, _tol))
-        self.assertTrue(nearlyEqual(1.73205080757, d3_4, _tol))
-        self.assertTrue(nearlyEqual(4.89897949, d1_3, _tol))
+        self.assertAlmostEqual(1.41421356, d1_2, _tol)
+        self.assertAlmostEqual(1.73205080757, d3_4, _tol)
+        self.assertAlmostEqual(4.89897949, d1_3, _tol)
 
     def test_2DBoundingBox(self):
         newPt = point.Point(5,6)
