@@ -73,7 +73,30 @@ class Azimuth(Angle):
             newAz = self.valu + deflction.valu
             return Azimuth(newAz)
         else:
-            raise NotImplementedError("Addition operation not supported for Azimuth plus Angle or its children.  Use Azimuth + Deflection.")
+            raise TypeError("Addition operation not supported for Azimuth plus Angle or its children.  Use Azimuth + Deflection.")
+
+    def __sub__(self, other):
+        """
+        Returns a deflection of the difference between the two Azimuths.
+        Note: This always returns the interior solution to the deflection.
+        If you need the exterior solution, call complement360() on the Deflection.
+        Example: defl = (Az2 - Az1).complement360()
+        :param other: Azimuth
+        :return: Deflection (will always be +/- pi)
+        """
+        if isinstance(other, Azimuth):
+            v1 = self.valu
+            v2 = other.valu
+            diff = v2 - v1
+            if diff < -math.pi:
+                diff += 2.0 * math.pi
+                diff *= -1.0
+            elif diff > math.pi:
+                diff -= 2.0 * math.pi
+                diff *= -1.0
+            return Deflection(diff)
+        else:
+            raise TypeError()
 
     def sin(self):
         """

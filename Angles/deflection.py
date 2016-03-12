@@ -28,6 +28,16 @@ class Deflection(Angle):
             elif self._angle > 0.0:
                 self._angle -= 2.0*math.pi
 
+    def complement360(self):
+        """
+        Returns a new Deflection of the current Deflection, but going the other
+        way around the circle.
+        :return: Deflection
+        """
+        if self.valu < 0.0:
+            return Deflection(2.0 * math.pi + self.valu)
+        return Deflection(-2.0 * math.pi + self.valu)
+
 # Todo: get Deflection addition to work. Problem is circular imports
     # def __add__(self, azmuth):
     #     if "<class 'azimuth.Azimuth'>" == str(type(azmuth)):
