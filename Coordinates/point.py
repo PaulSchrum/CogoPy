@@ -71,3 +71,10 @@ class Point(IBoundingBoxed):
     def __eq__(self, other):
         return nearlyEqual(self.distanceTo(other), 0.0, equalityTolerance)
         # return self.distanceTo(other) < equalityTolerance
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def assertPointEqual(self, other, tolerance=equalityTolerance):
+        if not nearlyEqual(self.distanceTo(other), 0.0, tolerance):
+            raise AssertionError("Two points are not equal.")
