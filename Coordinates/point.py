@@ -4,6 +4,7 @@ Z will be None for 2D points.
 '''
 from iBoundingBoxed import IBoundingBoxed
 from boundingBox import BoundingBox
+from Coordinates.vector import Vector as Vector
 from _helpers import nearlyEqual
 
 #equalityTolerance - for comparing floats within the point
@@ -78,3 +79,29 @@ class Point(IBoundingBoxed):
     def assertPointEqual(self, other, tolerance=equalityTolerance):
         if not nearlyEqual(self.distanceTo(other), 0.0, tolerance):
             raise AssertionError("Two points are not equal.")
+
+    def __add__(self, other):
+        if isinstance(other, Vector):
+            newX = self.X + other.dX
+            newY = self.Y + other.dY
+            newZ = self.Z
+            if not newZ is None:
+                if not other.dZ is None:
+                    newZ += other.dZ
+            return Point(newX, newY, newZ)
+        else:
+            raise TypeError("Point can only add to type Vector")
+
+    def __radd__(self, other):
+        if isinstance(other, Vector):
+            self.X = self.X + other.dX
+            self.Y = self.Y + other.dY
+            if self.Z is None:
+                if not other.dZ is None:
+                    self.Z = other.dZ
+            else:
+                if not other.dZ is None:
+                    self.Z = self.Z + other.dZ
+        else:
+            raise TypeError("Point can only add to type Vector")
+
