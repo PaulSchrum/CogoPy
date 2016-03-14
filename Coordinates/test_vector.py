@@ -119,3 +119,8 @@ class TestVector(TestCase):
         self.assertAlmostEqual(p1.Y, 24.0, 5)
         self.assertAlmostEqual(p1.Z, 272.0, 5)
 
+    def test_VectorChangePropertiesDirectly(self):
+        vec = Vector(1, 2)
+        vec.dZ = 123.4
+        dz = vec.dZ
+        self.assertAlmostEqual(dz, 123.4, 5)

@@ -81,6 +81,7 @@ class Point(IBoundingBoxed):
             raise AssertionError("Two points are not equal.")
 
     def __add__(self, other):
+        """Point + Vector = new Point"""
         if isinstance(other, Vector):
             newX = self.X + other.dX
             newY = self.Y + other.dY
@@ -93,6 +94,7 @@ class Point(IBoundingBoxed):
             raise TypeError("Point can only add to type Vector")
 
     def __radd__(self, other):
+        """Point + Vector moves original Point"""
         if isinstance(other, Vector):
             self.X = self.X + other.dX
             self.Y = self.Y + other.dY
@@ -104,4 +106,21 @@ class Point(IBoundingBoxed):
                     self.Z = self.Z + other.dZ
         else:
             raise TypeError("Point can only add to type Vector")
+
+    def __sub__(self, other):
+        """Point - Point = new Vector"""
+        if isinstance(other, Point):
+            if self.Z is not None:
+                if other.Z is not None:
+                    dZ = self.Z - other.Z
+                else:
+                    dZ = 20.0 #self.Z
+
+            elif other.Z is not None:
+                dZ = -other.Z
+            else:  # Z is None for both parameters
+                dZ = None
+            return Vector(self.X - other.X, self.Y - other.Y, dZ)
+        else:
+            raise TypeError("Point can only subtract from another Point")
 

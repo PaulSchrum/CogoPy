@@ -1,6 +1,7 @@
 from unittest import TestCase
 from math import fabs
 import Coordinates.point as point
+import Coordinates.vector as vector
 from _helpers import nearlyEqual
 
 _tol = 6
@@ -43,4 +44,38 @@ class TestPoint(TestCase):
         bb = newPt.getBoundingBox()
         self.assertTrue(bb.LowerLeft == point.Point(5,6))
         self.assertTrue(bb.UpperRight == point.Point(5,6))
+
+    def test_PointSubtraction_returnNewVector(self):
+        p1 = point.Point(10,10)
+        p2 = point.Point(20,20)
+        newVec = p2 - p1
+        expected = 10
+        actual = newVec.dX
+        self.assertAlmostEqual(expected, actual, 5)
+        self.assertIsNone(newVec.dZ)
+        actual = newVec.dY
+        self.assertAlmostEqual(expected, actual, 5)
+        p3 = p1 + newVec
+        self.assertTrue(p3 == p2)
+
+        p2 = point.Point(20, 20, 20)
+        newVec = p2 - p1
+        self.assertIsNotNone(newVec.dZ)
+        expected = 20
+        actual = newVec.dZ
+        self.assertAlmostEqual(expected, actual, 5)
+
+        p1 = point.Point(10,10,10)
+        newVec = p2 - p1
+        expected = 10
+        actual = newVec.dX
+        self.assertAlmostEqual(expected, actual, 5)
+        actual = newVec.dY
+        self.assertAlmostEqual(expected, actual, 5)
+        p3 = p1 + newVec
+        self.assertTrue(p3 == p2)
+        p3 = p1 + (p2 - p1)
+        self.assertTrue(p3 == p2)
+
+
 
