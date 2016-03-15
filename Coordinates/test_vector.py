@@ -2,7 +2,7 @@ from unittest import TestCase
 import Coordinates.vector as vector
 from Coordinates.vector import Vector as Vector
 from Coordinates.point import Point as Point
-
+import math
 
 class TestVector(TestCase):
     def test_createVectorNoParams(self):
@@ -124,3 +124,36 @@ class TestVector(TestCase):
         vec.dZ = 123.4
         dz = vec.dZ
         self.assertAlmostEqual(dz, 123.4, 5)
+
+    def test_Vector_getMagnitude(self):
+        vec = Vector(1,2)
+        expected = math.sqrt(5.0)
+        actual = vec.magnitude
+        self.assertAlmostEqual(expected, actual, 5)
+
+    def test_Vector_setMagnitude(self):
+        vec = Vector(1,2)
+        vec.magnitude = 1.0
+        expectedX = 0.4472135955
+        expectedY = 0.894427190999
+        actualX = vec.dX
+        actualY = vec.dY
+        self.assertAlmostEqual(expectedX, actualX, 5)
+        self.assertAlmostEqual(expectedY, actualY, 5)
+
+        vec = Vector(1,2,3)
+        vec.magnitude = 1.0
+        expectedX = 0.267261241913
+        expectedY = 0.534522483825
+        expectedZ = 0.801783725738
+        actualX = vec.dX
+        actualY = vec.dY
+        actualZ = vec.dZ
+        self.assertAlmostEqual(expectedX, actualX, 5)
+        self.assertAlmostEqual(expectedY, actualY, 5)
+        self.assertAlmostEqual(expectedZ, actualZ, 5)
+
+
+    # def test_VectorSpinVectorByTurnDenominator(self):
+
+
