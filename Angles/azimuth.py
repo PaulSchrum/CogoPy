@@ -68,6 +68,10 @@ class Azimuth(Angle):
         degRad = RadiansToDegreesFloat(self.valu)
         return degRad
 
+    @property
+    def _floatDegrees(self):
+        return RadiansToDegreesFloat(self.valu)
+
     def __add__(self, deflction):
         if isinstance(deflction, Deflection):
             newAz = self.valu + deflction.valu

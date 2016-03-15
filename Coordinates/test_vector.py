@@ -2,7 +2,9 @@ from unittest import TestCase
 import Coordinates.vector as vector
 from Coordinates.vector import Vector as Vector
 from Coordinates.point import Point as Point
+from Angles.deflection import Deflection as Deflection
 import math
+import degree
 
 class TestVector(TestCase):
     def test_createVectorNoParams(self):
@@ -153,7 +155,44 @@ class TestVector(TestCase):
         self.assertAlmostEqual(expectedY, actualY, 5)
         self.assertAlmostEqual(expectedZ, actualZ, 5)
 
+    def test_VectorVerifyAzimuth(self):
+        vec = Vector(1.0, 0)
+        expected = 90.0
+        actual = vec.azimuth.asDegreesFloat()
+        self.assertAlmostEqual(expected, actual, 5)
 
-    # def test_VectorSpinVectorByTurnDenominator(self):
+        vec = Vector(-1, 1)
+        expected = 315.0
+        actual = vec.azimuth.asDegreesFloat()
+        self.assertAlmostEqual(expected, actual, 5)
+
+        vec = Vector(0,1)
+        vec.azimuth = degree.Degree(90)
+        self.assertAlmostEqual(1.0, vec.dX, 5)
+        self.assertAlmostEqual(0.0, vec.dY, 5)
+
+
+    def test_VectorSpinVectorByTurnDenominator(self):
+        vec = Vector(1,2)
+        expected = 26.565051177
+        self.assertAlmostEqual(vec.azimuth.asDegreesFloat(), expected, 5)
+        vec.spinInXYbyTurns(1 / 4.0)
+        expected += 90.0
+        self.assertAlmostEqual(vec.azimuth.asDegreesFloat(), expected, 5)
+
+    def test_Vector_addToDeflection(self):
+        vec1 = Vector(1,2)
+        expected = 26.565051177
+        self.assertAlmostEqual(vec1.azimuth.asDegreesFloat(), expected, 5)
+        defl = Deflection(degree.Degree(90.0))
+        vec2 = vec1 + defl
+        expected += 90.0
+        self.assertAlmostEqual(vec2.azimuth.asDegreesFloat(), expected, 5)
+
+        defl = Deflection(degree.Degree(-90.0))
+        vec3 = vec1 + defl
+        expected += 180.0
+        self.assertAlmostEqual(vec3.azimuth.asDegreesFloat(), expected, 5)
+
 
 
