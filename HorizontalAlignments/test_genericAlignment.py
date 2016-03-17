@@ -1,6 +1,23 @@
 from unittest import TestCase
 from genericAlignment import GenericAlignment as GenericAlignment
 
+def alignmentAssert(
+        testClass,
+        alignment,
+        staBeginVal=None,
+        staBeginRegion=None,
+        staEndVal=None,
+        staEndRegion=None,
+        alignLength=None
+            ):
+    testClass.assertIsNotNone(alignment)
+    testClass.assertTrue(isinstance(alignment, GenericAlignment))
+    if staBeginVal: testClass.assertAlmostEqual(staBeginVal, alignment.BeginStation.station)
+    if staBeginRegion: testClass.assertAlmostEqual(staBeginRegion, alignment.BeginStation.region)
+    if alignLength: testClass.assertAlmostEqual(alignLength, alignment.Length)
+    if staEndVal: testClass.assertAlmostEqual(staEndVal, alignment.EndStation.station)
+    if staEndRegion: testClass.assertEqual(staEndRegion, alignment.EndStation.region)
+
 class TestGenericAlignment(TestCase):
     def setUp(self):
         if not hasattr(self, 'customStuffInitialized'):
@@ -15,16 +32,12 @@ class TestGenericAlignment(TestCase):
                                                regionTupleList=[(1100, 2250)])
 
     def test_createSimpleGenericAlignment(self):
-        self.assertIsNotNone(self.alignment1)
-        self.assertTrue(isinstance(self.alignment1, GenericAlignment))
-        self.assertAlmostEqual(1000.0, self.alignment1.BeginStation.station)
-        self.assertAlmostEqual(1000.0, self.alignment1.Length)
-        self.assertAlmostEqual(2000.0, self.alignment1.EndStation.station)
-        self.assertEqual(1, self.alignment1.EndStation.region)
+        alignmentAssert(self, self.alignment1, staBeginVal=1000.0,
+                        staEndVal=2000.0, alignLength=1000.0,
+                        staEndRegion=1)
 
     def test_createGenericAlignment_withRegionListLen1(self):
-        self.assertIsNotNone(self.alignment2)
-        self.assertTrue(isinstance(self.alignment2, GenericAlignment))
-        self.assertAlmostEqual(1100.0, self.alignment2.BeginStation.station)
-        self.assertAlmostEqual(1150.0, self.alignment2.Length)
-        self.assertAlmostEqual(2250.0, self.alignment2.EndStation.station)
+        alignmentAssert(self, self.alignment2, staBeginVal=1100.0,
+                        staEndVal=2250.0, alignLength=1150.0,
+                        staBeginRegion=1,staEndRegion=1)
+
