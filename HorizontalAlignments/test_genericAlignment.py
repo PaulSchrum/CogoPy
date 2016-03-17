@@ -1,5 +1,5 @@
 from unittest import TestCase
-from genericAlignment import GenericAlignment as GenericAlignment
+from HorizontalAlignments.genericAlignment import GenericAlignment as GenericAlignment
 
 def alignmentAssert(
         testClass,
