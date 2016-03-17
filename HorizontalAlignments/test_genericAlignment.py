@@ -30,6 +30,14 @@ class TestGenericAlignment(TestCase):
             self.alignment2 = GenericAlignment(parentAlignment=None,
                                                Name='AL2',
                                                regionTupleList=[(1100, 2250)])
+            self.alignment3 = GenericAlignment(
+                               parentAlignment=None,
+                               Name='3Regions',
+                               regionTupleList=[
+                                   (1000,3300)
+                                   ,(10000.5, 10050.6)
+                                   ,(500.7,1100.1)
+                                    ])
 
     def test_createSimpleGenericAlignment(self):
         alignmentAssert(self, self.alignment1, staBeginVal=1000.0,
@@ -40,4 +48,9 @@ class TestGenericAlignment(TestCase):
         alignmentAssert(self, self.alignment2, staBeginVal=1100.0,
                         staEndVal=2250.0, alignLength=1150.0,
                         staBeginRegion=1,staEndRegion=1)
+
+    def test_GenericAlignment_with3Regions(self):
+        alignmentAssert(self, self.alignment3, staBeginVal=1000.0,
+                        staEndVal=1100.1, alignLength=2949.5,
+                        staBeginRegion=1,staEndRegion=3)
 
