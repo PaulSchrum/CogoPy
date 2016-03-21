@@ -56,10 +56,9 @@ class Station():
         elif isinstance(other, (float, int, long)):
             if self.alignment is None:
                 return Station(self.station - float(other))
-
-    # Todo: Add __rsub__ (Station) to alter current station
-    def __rsub__(self, other):
-        raise NotImplementedError
+            else:
+                newTrueSta = self.trueStation - other
+                return self.alignment.getStationFromTrueStation(newTrueSta)
 
 
 class StationError(Exception):
