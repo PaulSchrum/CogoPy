@@ -19,6 +19,10 @@ class Station():
         if alignment is not None and not isinstance(alignment, genericAlignment.GenericAlignment):
             raise TypeError("alignment parameter must be subclass of GenericAlignment")
         self.alignment = alignment
+        if alignment is not None:
+            self.trueStation = self.alignment.getTrueStation(station, self.region)
+        else:
+            self.trueStation = station
 
     @property
     def trueStation(self):
@@ -27,19 +31,35 @@ class Station():
         else:
             return self.alignment.getTrueStation(self.station, self.region)
 
-    # Todo: Add __add__ and __radd__(float) to return new station
     def __add__(self, other):
         if self.alignment is None:
             return Station(self.station + other)
+        else:
+            sta, reg = self.alignment.getStationRegion(self.trueStation + other)
+            return Station(station=sta, region=reg, alignment=self.alignment)
 
-    # Todo: Add __sub__ and __rsub__ (Station) to return float of the length along
+    # Todo: Add __radd__(float) to alter current station
+    def __radd__(self, other):
+        raise NotImplementedError
+        # if self.alignment is None:
+        #     return Station(self.station + other)
+        # else:
+        #     sta, reg = self.alignment.getStationRegion(self.trueStation + other)
+        #     return Station(station=sta, region=reg, alignment=self.alignment)
+
     def __sub__(self, other):
         if isinstance(other, Station) and self.alignment == other.alignment:
             if self.alignment is None:
                 return self.station - other.station
+            else:
+                return self.trueStation - other.trueStation
         elif isinstance(other, (float, int, long)):
             if self.alignment is None:
                 return Station(self.station - float(other))
+
+    # Todo: Add __rsub__ (Station) to alter current station
+    def __rsub__(self, other):
+        raise NotImplementedError
 
 
 class StationError(Exception):
