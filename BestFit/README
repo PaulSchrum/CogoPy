@@ -1,0 +1,11 @@
+BestFit is starting its life out as a course project for GIS 540 (at NC State).  Because
+of this, there will be some code smells that are due to constraints imposed by an
+introductory programming course.  These code smells will factored out after the course
+project has been submitted.
+
+BestFit takes an ordered list of 2D points and computes a fairly good fit Cogo Horizontal
+Alignment.  Maybe it should have been called FairFit or NoneTooShabbyFit.  But it's not.
+
+The coordinate domain is assumed to be planar.  If you are using lat/long, it is
+recommended that you project it to a plane.
+
