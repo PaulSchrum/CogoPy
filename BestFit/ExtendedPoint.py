@@ -80,9 +80,12 @@ class ray2D():
         """
         if self.azimuth == otherRay.azimuth:
             raise IntersectionError()
-        deltaVec = otherRay.extendedPoint - self.extendedPoint
-
-
+        # Technical debt: handle case where slope is vertical
+        dx = (otherRay.yIntercept - self.yIntercept) / \
+             (self.slope - otherRay.slope)
+        dy = self.slope * dx
+        return ExtendedPoint(self.extendedPoint.X + dx,
+                             self.extendedPoint.Y + dy)
 
 def getDist2Points(p1, p2):
     """
@@ -203,6 +206,6 @@ if __name__ == '__main__':
     expected = 25.0
     assert math.fabs(point4.Y - expected) < 0.0001
     expected = 5.0
-    assert math.fabs(point4.Y - expected) < 0.0001
+    assert math.fabs(point4.X - expected) < 0.0001
 
     print 'tests complete.'
