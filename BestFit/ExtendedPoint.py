@@ -71,6 +71,14 @@ class ray2D():
         self.slope = math.cos(azimuth) / math.sin(azimuth)
         self.yIntercept = extendedPt.Y - self.slope * extendedPt.X
 
+    def given_X_get_Y(self, xValue):
+        '''Return Y using the y = mx + b equation of a line.'''
+        return self.slope * xValue + self.yIntercept
+
+    def given_Y_get_X(self, yValue):
+        '''Return X using y = mx + b solved for x.'''
+        return (yValue - self.yIntercept) / self.slope
+
     def intersectWith(self, otherRay):
         """
         Given this ray and another, find the intersection point of the two.
@@ -82,7 +90,7 @@ class ray2D():
             raise IntersectionError()
         # Technical debt: handle case where slope is vertical
         dx = (otherRay.yIntercept - self.yIntercept) / \
-             (self.slope - otherRay.slope)
+             (otherRay.slope - self.slope)
         dy = self.slope * dx
         return ExtendedPoint(self.extendedPoint.X + dx,
                              self.extendedPoint.Y + dy)
@@ -161,6 +169,14 @@ def compute_arc_parameters(point1, point2, point3):
                                           azimuth12)
     midPoint12 = point1 + halfVec12
 
+def _assertFloatsEqual(f1, f2):
+    '''Test whether two floats are approximately equal.
+    The idea for the added message comes from
+    http://stackoverflow.com/a/3808078/1339950
+    '''
+    customMessage = "{0} does not equal {1}".format(f1, f2)
+    assert math.fabs(f1 - f2) < 0.000001, customMessage
+
 if __name__ == '__main__':
     print 'running module tests for ExtendedPoint.py'
     print
@@ -173,39 +189,45 @@ if __name__ == '__main__':
     point2 = ExtendedPoint(20.0, 25.0)
     distance12 = getDist2Points(point1, point2)
     expected = 11.18033989
-    assert math.fabs(distance12 - expected) < 0.0001
+    _assertFloatsEqual(distance12, expected)
 
     azmuth12 = getAzimuth(point1, point2)
     expected = 1.10714940556
-    assert  math.fabs(azmuth12 - expected) < 0.00001
+    _assertFloatsEqual(azmuth12, expected)
 
     # Test vector creation
     vec12 = vectorFromDistanceAzimuth(distance12, azmuth12)
-    assert math.fabs(vec12.X - 10.0) < 0.00001
-    assert math.fabs(vec12.Y - 5.0) < 0.00001
+    _assertFloatsEqual(vec12.X, 10.0)
+    _assertFloatsEqual(vec12.Y, 5.0)
 
     # Test add Point to Point (treated as a Vector)
     point3 = point1 + point2
     expected = 30.0
-    assert math.fabs(point3.X - expected) < 0.00001
+    _assertFloatsEqual(point3.X, expected)
     expected = 45.0
-    assert math.fabs(point3.Y - expected) < 0.00001
+    _assertFloatsEqual(point3.Y, expected)
 
     # Test 2D Ray Creation
     az = math.pi * 0.75
     aRay = ray2D(point1, az)
     expected = -1.0
-    assert math.fabs(aRay.slope - expected) < 0.00001
+    _assertFloatsEqual(aRay.slope, expected)
     expected = 30.0
-    assert math.fabs(aRay.yIntercept - expected) < 0.000001
+    _assertFloatsEqual(aRay.yIntercept, expected)
 
-    az = math.pi / 2.0
+    az = math.pi / 4.0
     anotherRay = ray2D(point2, az)
+    expected = 1.0
+    actual = anotherRay.given_Y_get_X(6.0)
+    _assertFloatsEqual(actual, expected)
+    expected = 6.0
+    actual = anotherRay.given_X_get_Y(1.0)
+    _assertFloatsEqual(actual, expected)
 
     point4 = aRay.intersectWith(anotherRay)
     expected = 25.0
-    assert math.fabs(point4.Y - expected) < 0.0001
+    _assertFloatsEqual(point4.Y, expected)
     expected = 5.0
-    assert math.fabs(point4.X - expected) < 0.0001
+    _assertFloatsEqual(point4.X, expected)
 
     print 'tests complete.'
