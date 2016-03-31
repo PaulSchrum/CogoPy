@@ -63,6 +63,11 @@ class IntersectionError(Exception):
         self.message =  "No intersection found for the two items."
 
 class Ray2D():
+    '''
+    Represents a bidirectional ray, usually used for finding intersections.
+    Also known as a line (as in, unbounded line).
+    If the ray is vertical, slope and yIntercept are float("inf")
+    '''
     def __init__(self, extendedPt, azimuth):
         self.extendedPoint = extendedPt
         self.azimuth =  azimuth
@@ -71,10 +76,18 @@ class Ray2D():
         if azimuth == 0.0:
             self.slope = float("inf")
         elif azimuth == math.pi:
-            self.slope = float("-inf")
+            self.slope = float("inf")
         else:
             self.slope = math.cos(azimuth) / math.sin(azimuth)
         self.yIntercept = extendedPt.Y - self.slope * extendedPt.X
+
+    def __repr__(self):
+        if self.slope == float(inf):
+            str = 'Vertical @ X = {0}'.format(self.extendedPoint.X)
+        else:
+            str = 'Slope: {0}  yIntercept: {1}'.format(self.slope,
+                                                       self.yIntercept)
+        return str
 
     def given_X_get_Y(self, xValue):
         '''Return Y using the y = mx + b equation of a line.'''
@@ -82,6 +95,8 @@ class Ray2D():
 
     def given_Y_get_X(self, yValue):
         '''Return X using y = mx + b solved for x.'''
+        if self.slope == float("inf"):
+            return self.extendedPoint.X
         return (yValue - self.yIntercept) / self.slope
 
     def intersectWith(self, otherRay):
@@ -93,11 +108,20 @@ class Ray2D():
         """
         if self.azimuth == otherRay.azimuth:
             raise IntersectionError()
-        # Technical debt: handle case where slope is vertical
-        newY = (otherRay.yIntercept - self.yIntercept) / \
-             (otherRay.slope - self.slope)
-        newX = self.slope * newY
-        return ExtendedPoint(newX, self.yIntercept + newY)
+        if otherRay.slope == float('inf'):
+            newX = otherRay.extendedPoint.X
+            yInt = self.yIntercept
+            newY = self.slope * newX
+        elif self.slope == float('inf'):
+            newX = self.extendedPoint.X
+            yInt = otherRay.yIntercept
+            newY = otherRay.slope * newX
+        else:
+            yInt = self.yIntercept
+            newY = (otherRay.yIntercept - yInt) / \
+                 (otherRay.slope - self.slope)
+            newX = self.slope * newY
+        return ExtendedPoint(newX, yInt + newY)
 
 def getDist2Points(p1, p2):
     """
@@ -234,5 +258,19 @@ if __name__ == '__main__':
     _assertFloatsEqual(point4.Y, expected)
     expected = 12.5
     _assertFloatsEqual(point4.X, expected)
+
+    # Test ray intersecting a vertical ray
+    verticalRay = Ray2D(ExtendedPoint(11.0, 1.0), math.pi)
+    point5 = aRay.intersectWith(verticalRay)
+    expected = 19.0
+    _assertFloatsEqual(point5.Y, expected)
+    expected = 11.0
+    _assertFloatsEqual(point5.X, expected)
+
+    point5 = verticalRay.intersectWith(aRay)
+    expected = 19.0
+    _assertFloatsEqual(point5.Y, expected)
+    expected = 11.0
+    _assertFloatsEqual(point5.X, expected)
 
     print 'tests complete.'
