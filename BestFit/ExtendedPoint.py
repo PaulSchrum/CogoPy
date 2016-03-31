@@ -205,6 +205,15 @@ def _assertFloatsEqual(f1, f2):
     customMessage = "{0} does not equal {1}".format(f1, f2)
     assert math.fabs(f1 - f2) < 0.000001, customMessage
 
+def _assertPointsEqualXY(p1, p2):
+    '''Test whether two points are approximately equal.
+    Only tests equality of X and Y.  Other extended properties
+    are ignored
+    '''
+    customMessage = "{0} does not equal {1}".format(p1, p2)
+    assert math.fabs(p1.X - p2.X) < 0.000001, customMessage
+    assert math.fabs(p1.Y - p2.Y) < 0.000001, customMessage
+
 if __name__ == '__main__':
     print 'running module tests for ExtendedPoint.py'
     print
@@ -225,15 +234,13 @@ if __name__ == '__main__':
 
     # Test vector creation
     vec12 = vectorFromDistanceAzimuth(distance12, azmuth12)
-    _assertFloatsEqual(vec12.X, 10.0)
-    _assertFloatsEqual(vec12.Y, 5.0)
+    expected = ExtendedPoint(10.0, 5.0)
+    _assertPointsEqualXY(vec12, expected)
 
     # Test add Point to Point (treated as a Vector)
     point3 = point1 + point2
-    expected = 30.0
-    _assertFloatsEqual(point3.X, expected)
-    expected = 45.0
-    _assertFloatsEqual(point3.Y, expected)
+    expected = ExtendedPoint(30.0, 45.0)
+    _assertPointsEqualXY(point3, expected)
 
     # Test 2D Ray Creation
     az = math.pi * 0.75
@@ -254,23 +261,17 @@ if __name__ == '__main__':
 
     # Test ray intersecting another ray
     point4 = aRay.intersectWith(anotherRay)
-    expected = 17.5
-    _assertFloatsEqual(point4.Y, expected)
-    expected = 12.5
-    _assertFloatsEqual(point4.X, expected)
+    expected = ExtendedPoint(12.5, 17.5)
+    _assertPointsEqualXY(point4, expected)
 
     # Test ray intersecting a vertical ray
     verticalRay = Ray2D(ExtendedPoint(11.0, 1.0), math.pi)
     point5 = aRay.intersectWith(verticalRay)
-    expected = 19.0
-    _assertFloatsEqual(point5.Y, expected)
-    expected = 11.0
-    _assertFloatsEqual(point5.X, expected)
+    expected = ExtendedPoint(11.0, 19.0)
+    _assertPointsEqualXY(point5, expected)
 
     point5 = verticalRay.intersectWith(aRay)
-    expected = 19.0
-    _assertFloatsEqual(point5.Y, expected)
-    expected = 11.0
-    _assertFloatsEqual(point5.X, expected)
+    expected = ExtendedPoint(11.0, 19.0)
+    _assertPointsEqualXY(point5, expected)
 
     print 'tests complete.'
