@@ -62,13 +62,18 @@ class IntersectionError(Exception):
     def __init__(self):
         self.message =  "No intersection found for the two items."
 
-class ray2D():
+class Ray2D():
     def __init__(self, extendedPt, azimuth):
         self.extendedPoint = extendedPt
         self.azimuth =  azimuth
         acos = math.cos(azimuth)
         asin = math.sin(azimuth)
-        self.slope = math.cos(azimuth) / math.sin(azimuth)
+        if azimuth == 0.0:
+            self.slope = float("inf")
+        elif azimuth == math.pi:
+            self.slope = float("-inf")
+        else:
+            self.slope = math.cos(azimuth) / math.sin(azimuth)
         self.yIntercept = extendedPt.Y - self.slope * extendedPt.X
 
     def given_X_get_Y(self, xValue):
@@ -208,14 +213,14 @@ if __name__ == '__main__':
 
     # Test 2D Ray Creation
     az = math.pi * 0.75
-    aRay = ray2D(point1, az)
+    aRay = Ray2D(point1, az)
     expected = -1.0
     _assertFloatsEqual(aRay.slope, expected)
     expected = 30.0
     _assertFloatsEqual(aRay.yIntercept, expected)
 
     az = math.pi / 4.0
-    anotherRay = ray2D(point2, az)
+    anotherRay = Ray2D(point2, az)
     expected = 1.0
     actual = anotherRay.given_Y_get_X(6.0)
     _assertFloatsEqual(actual, expected)
@@ -223,6 +228,7 @@ if __name__ == '__main__':
     actual = anotherRay.given_X_get_Y(1.0)
     _assertFloatsEqual(actual, expected)
 
+    # Test ray intersecting another ray
     point4 = aRay.intersectWith(anotherRay)
     expected = 17.5
     _assertFloatsEqual(point4.Y, expected)
