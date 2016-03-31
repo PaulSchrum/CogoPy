@@ -47,6 +47,43 @@ class ExtendedPoint():
         self.degreeCurve = False
         self.curveCenter = False
 
+    def __repr__(self):
+        return '{0}, {1}'.format(self.X, self.Y)
+
+    def __add__(self, other):
+        return ExtendedPoint(self.X + other.X,
+                             self.Y + other.Y)
+
+    def __sub__(self, other):
+        return ExtendedPoint(other.X - self.X,
+                             other.Y - self.Y)
+
+class IntersectionError(Exception):
+    def __init__(self):
+        self.message =  "No intersection found for the two items."
+
+class ray2D():
+    def __init__(self, extendedPt, azimuth):
+        self.extendedPoint = extendedPt
+        self.azimuth =  azimuth
+        acos = math.cos(azimuth)
+        asin = math.sin(azimuth)
+        self.slope = math.cos(azimuth) / math.sin(azimuth)
+        self.yIntercept = extendedPt.Y - self.slope * extendedPt.X
+
+    def intersectWith(self, otherRay):
+        """
+        Given this ray and another, find the intersection point of the two.
+        :param otherRay: Ray to be intersected
+        :return: ExtendedPoint of the Intersection
+        :raises: IntersectionError if rays are parallel
+        """
+        if self.azimuth == otherRay.azimuth:
+            raise IntersectionError()
+        deltaVec = otherRay.extendedPoint - self.extendedPoint
+
+
+
 def getDist2Points(p1, p2):
     """
     returns the distance between two points.
@@ -67,6 +104,18 @@ def getAzimuth(p1, p2):
     dy = p2.Y - p1.Y
     dx = p2.X - p1.X
     return math.atan2(dx, dy)
+
+def vectorFromDistanceAzimuth(length, az):
+    """
+    Given a vector in the form of length and azimuth,
+        compute the vector values of dX and dY.
+    :param length: length of the vector
+    :param az: azimuth of the vector
+    :return: ExtendedPoint with values X =dX, Y = dY
+    """
+    dx = length * math.sin(az)
+    dy = length * math.cos(az)
+    return ExtendedPoint(dx, dy)
 
 def compute_arc_parameters(point1, point2, point3):
     """
@@ -90,4 +139,70 @@ def compute_arc_parameters(point1, point2, point3):
 
     point2.pt2pt.deflection = defl
 
+    point2.arc = object()
+    if defl == 0.0:
+        point2.arc.degreeCurve = 0.0
+        point2.arc.curveCenter = False
+        point2.arc.lengthBack = False
+        point2.arc.lengthAhead = False
+        point2.arc.deflection = False
+        return
 
+    # compute Center point of resulting arc
+    # taken from http://stackoverflow.com/a/22792373/1339950
+    # Answer to:
+    # "Algorithm to find an arc, its center, radius and angles given 3 points"
+
+    # Get center of vec12 a center point of secant1to2
+    halfVec12 = vectorFromDistanceAzimuth(point2.pt2pt.distanceBack / 2.0,
+                                          azimuth12)
+    midPoint12 = point1 + halfVec12
+
+if __name__ == '__main__':
+    print 'running module tests for ExtendedPoint.py'
+    print
+
+    # Test Point Creation by 2 floats
+    point1 = ExtendedPoint(10.0, 20.0)
+    assert point1.X == 10.0
+    assert point1.Y == 20.0
+
+    point2 = ExtendedPoint(20.0, 25.0)
+    distance12 = getDist2Points(point1, point2)
+    expected = 11.18033989
+    assert math.fabs(distance12 - expected) < 0.0001
+
+    azmuth12 = getAzimuth(point1, point2)
+    expected = 1.10714940556
+    assert  math.fabs(azmuth12 - expected) < 0.00001
+
+    # Test vector creation
+    vec12 = vectorFromDistanceAzimuth(distance12, azmuth12)
+    assert math.fabs(vec12.X - 10.0) < 0.00001
+    assert math.fabs(vec12.Y - 5.0) < 0.00001
+
+    # Test add Point to Point (treated as a Vector)
+    point3 = point1 + point2
+    expected = 30.0
+    assert math.fabs(point3.X - expected) < 0.00001
+    expected = 45.0
+    assert math.fabs(point3.Y - expected) < 0.00001
+
+    # Test 2D Ray Creation
+    az = math.pi * 0.75
+    aRay = ray2D(point1, az)
+    expected = -1.0
+    assert math.fabs(aRay.slope - expected) < 0.00001
+    expected = 30.0
+    assert math.fabs(aRay.yIntercept - expected) < 0.000001
+
+    az = math.pi / 2.0
+    anotherRay = ray2D(point2, az)
+
+    point4 = aRay.intersectWith(anotherRay)
+    expected = 25.0
+    assert math.fabs(point4.Y - expected) < 0.0001
+    expected = 5.0
+    assert math.fabs(point4.Y - expected) < 0.0001
+
+    print 'tests complete.'
