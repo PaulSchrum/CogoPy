@@ -89,11 +89,10 @@ class ray2D():
         if self.azimuth == otherRay.azimuth:
             raise IntersectionError()
         # Technical debt: handle case where slope is vertical
-        dx = (otherRay.yIntercept - self.yIntercept) / \
+        newY = (otherRay.yIntercept - self.yIntercept) / \
              (otherRay.slope - self.slope)
-        dy = self.slope * dx
-        return ExtendedPoint(self.extendedPoint.X + dx,
-                             self.extendedPoint.Y + dy)
+        newX = self.slope * newY
+        return ExtendedPoint(newX, self.yIntercept + newY)
 
 def getDist2Points(p1, p2):
     """
@@ -225,9 +224,9 @@ if __name__ == '__main__':
     _assertFloatsEqual(actual, expected)
 
     point4 = aRay.intersectWith(anotherRay)
-    expected = 25.0
+    expected = 17.5
     _assertFloatsEqual(point4.Y, expected)
-    expected = 5.0
+    expected = 12.5
     _assertFloatsEqual(point4.X, expected)
 
     print 'tests complete.'
