@@ -16,7 +16,7 @@ class ExtendedPoint():
             arc.degreeCurve  (float) - degree of curve based on deflection
                 over 1 unit (meters or feet - on any Planar Coordinate
                 System) Derived by equation, set by method, not set by user
-            arc.curveCenter (Point or Extended Point) - Circular curve center
+            arc.curveCenterPoint (Point or Extended Point) - Circular curve center
                 point related to this point (self) as set by method call.
             arc.lengthBack (float) - distance along the arc back to the
                 previous point.
@@ -44,8 +44,8 @@ class ExtendedPoint():
         else:
             self.X = aPoint
             self.Y = newY
-        self.degreeCurve = False
-        self.curveCenter = False
+        self.pt2pt = False
+        self.arc = False
 
     def __repr__(self):
         return '{0}, {1}'.format(self.X, self.Y)
@@ -57,6 +57,13 @@ class ExtendedPoint():
     def __sub__(self, other):
         return ExtendedPoint(other.X - self.X,
                              other.Y - self.Y)
+
+class struct():
+    '''
+    Named for and serving a similar purpose as the C concept of Struct.
+    This class exists as something to add attributes to dynamically.
+    '''
+    pass
 
 class IntersectionError(Exception):
     def __init__(self):
@@ -74,12 +81,20 @@ class Ray2D():
         acos = math.cos(azimuth)
         asin = math.sin(azimuth)
         if azimuth == 0.0:
-            self.slope = float("inf")
+            self._slope = float("inf")
         elif azimuth == math.pi:
-            self.slope = float("inf")
+            self._slope = float("inf")
         else:
-            self.slope = math.cos(azimuth) / math.sin(azimuth)
-        self.yIntercept = extendedPt.Y - self.slope * extendedPt.X
+            self._slope = math.cos(azimuth) / math.sin(azimuth)
+        self._yIntercept = extendedPt.Y - self.slope * extendedPt.X
+
+    @property
+    def slope(self):
+        return self._slope
+
+    @property
+    def yIntercept(self):
+        return self._yIntercept
 
     def __repr__(self):
         if self.slope == float(inf):
@@ -123,6 +138,25 @@ class Ray2D():
             newX = self.slope * newY
         return ExtendedPoint(newX, yInt + newY)
 
+    @staticmethod
+    def get_bisecting_normal_ray(firstPt, otherPt):
+        '''
+        Given this point and another, return the ray which bisects the
+            line segment between the two.
+        :rtype: Ray2D
+        :param otherPt: Second point of the line segment to be bisected.
+        :return: Ray2d with origin point at the bisector of the line segment
+            and ahead direction 90 degrees to the right of the line segment.
+        '''
+        if otherPt.pt2pt:
+            distBack = otherPt.pt2pt.distanceBack / 2.0
+        else:
+            distBack = getDist2Points(firstPt, otherPt)
+        az12 = getAzimuth(firstPt, otherPt)
+        halfVec12 = vectorFromDistanceAzimuth(distBack / 2.0, az12)
+        midPoint12 = firstPt + halfVec12
+        return Ray2D(midPoint12, az12 + math.pi / 2.0)
+
 def getDist2Points(p1, p2):
     """
     returns the distance between two points.
@@ -148,9 +182,10 @@ def vectorFromDistanceAzimuth(length, az):
     """
     Given a vector in the form of length and azimuth,
         compute the vector values of dX and dY.
+    :rtype: ExtendedPoint
     :param length: length of the vector
     :param az: azimuth of the vector
-    :return: ExtendedPoint with values X =dX, Y = dY
+    :return: ExtendedPoint with values X =dX, Y = dY, being considered a vector
     """
     dx = length * math.sin(az)
     dy = length * math.cos(az)
@@ -165,7 +200,7 @@ def compute_arc_parameters(point1, point2, point3):
     :param point3: Ahead point
     :return: None
     """
-    point2.pt2pt = object()
+    point2.pt2pt = struct()
     point2.pt2pt.distanceBack = getDist2Points(point2, point1)
     point2.pt2pt.distanceAhead = getDist2Points(point3, point2)
     azimuth12 = getAzimuth(point2, point1)
@@ -178,13 +213,13 @@ def compute_arc_parameters(point1, point2, point3):
 
     point2.pt2pt.deflection = defl
 
-    point2.arc = object()
+    point2.arc = struct()
     if defl == 0.0:
         point2.arc.degreeCurve = 0.0
         point2.arc.curveCenter = False
         point2.arc.lengthBack = False
         point2.arc.lengthAhead = False
-        point2.arc.deflection = False
+        point2.arc.deflection = 0.0
         return
 
     # compute Center point of resulting arc
@@ -192,10 +227,12 @@ def compute_arc_parameters(point1, point2, point3):
     # Answer to:
     # "Algorithm to find an arc, its center, radius and angles given 3 points"
 
-    # Get center of vec12 a center point of secant1to2
+    # Get the ray bisecting secant12 and normal to it
+    biRay12 = Ray2D.get_bisecting_normal_ray(point1, point2)
     halfVec12 = vectorFromDistanceAzimuth(point2.pt2pt.distanceBack / 2.0,
                                           azimuth12)
     midPoint12 = point1 + halfVec12
+    ray12ToCenter = Ray2D(midPoint12, azimuth12 + math.pi / 2.0)
 
 def _assertFloatsEqual(f1, f2):
     '''Test whether two floats are approximately equal.
@@ -273,5 +310,22 @@ if __name__ == '__main__':
     point5 = verticalRay.intersectWith(aRay)
     expected = ExtendedPoint(11.0, 19.0)
     _assertPointsEqualXY(point5, expected)
+
+    # Test get_bisecting_normal_ray
+    p1 = ExtendedPoint(0, 0)
+    p2 = ExtendedPoint(10, 10)
+    aRay = Ray2D.get_bisecting_normal_ray(p1, p2)
+    expected = ExtendedPoint(5.0, 5.0)
+    _assertPointsEqualXY(aRay.extendedPoint, expected)
+    expected = -1.0
+    _assertFloatsEqual(aRay.slope, expected)
+
+    p1 = ExtendedPoint(1.0, 10.0)
+    p2 = ExtendedPoint(8.8, 8.7)
+    p3 = ExtendedPoint(10.0, 1.0)
+    # compute_arc_parameters(p1, p2, p3)
+    expected = ExtendedPoint(1.0, 1.0)
+    # actual = p2.arc.curveCenterPoint
+    # _assertPointsEqualXY(actual, expected)
 
     print 'tests complete.'
