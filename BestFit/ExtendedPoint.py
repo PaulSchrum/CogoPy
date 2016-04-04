@@ -25,6 +25,8 @@ class ExtendedPoint():
             arc.deflection - total deflection from back point to ahead point
                 as deflected along the arc defined by the three points. Value
                 interpreted as radians.
+            arc.radiusStartVector - vector from curve center to Point1 (begin point)
+            arc.radiusEndVector - vector from curve center to Point3 (end point)
         pt2pt (object) - values related to the points as the vertex of
             a triangle.
             pt2pt.distanceBack (float) - chord distance to previous point
@@ -48,7 +50,10 @@ class ExtendedPoint():
         self.arc = False
 
     def __repr__(self):
-        return '{0}, {1}'.format(self.X, self.Y)
+        return '{0}, {1}: Mag {2}  Az {3}'.format(self.X,
+                                                  self.Y,
+                                                  self.magnitude,
+                                                  self.azimuth)
 
     def __add__(self, other):
         return ExtendedPoint(self.X + other.X,
@@ -57,6 +62,14 @@ class ExtendedPoint():
     def __sub__(self, other):
         return ExtendedPoint(other.X - self.X,
                              other.Y - self.Y)
+
+    @property
+    def magnitude(self):
+        return math.sqrt(self.X * self.X + self.Y * self.Y)
+
+    @property
+    def azimuth(self):
+        return math.atan2(self.X, self.Y)
 
 class struct():
     '''
@@ -123,10 +136,10 @@ class Ray2D():
         """
         if self.azimuth == otherRay.azimuth:
             raise IntersectionError()
-        if otherRay.slope == float('inf'):
+        if math.isinf(otherRay.slope):
             newX = otherRay.extendedPoint.X
             newY = self.yIntercept + self.slope * newX
-        elif self.slope == float('inf'):
+        elif math.isinf(self.slope):
             newX = self.extendedPoint.X
             newY = otherRay.yIntercept + otherRay.slope * newX
         else:
@@ -214,9 +227,12 @@ def compute_arc_parameters(point1, point2, point3):
     point2.arc = struct()
     if defl == 0.0:
         point2.arc.degreeCurve = 0.0
+        point2.arc.radius = float('inf')
         point2.arc.curveCenter = False
         point2.arc.lengthBack = False
         point2.arc.lengthAhead = False
+        point2.arc.radiusStartVector = False
+        point2.arc.radiusEndVector = False
         point2.arc.deflection = 0.0
         return
 
@@ -230,6 +246,17 @@ def compute_arc_parameters(point1, point2, point3):
     biRay23 = Ray2D.get_bisecting_normal_ray(point2, point3)
 
     point2.arc.curveCenter = biRay12.intersectWith(biRay23)
+
+    point2.arc.radiusStartVector = point2.arc.curveCenter - point1
+    point2.arc.radiusEndVector = point2.arc.curveCenter - point3
+    point2.arc.degreeCurve = 1.0 / point2.arc.radiusEndVector.magnitude
+    point2.arc.deflection = point2.arc.radiusEndVector.azimuth - point2.arc.radiusStartVector.azimuth
+
+    p2Vector = point2.arc.curveCenter - point2
+    defl12 = p2Vector.azimuth - point2.arc.radiusStartVector.azimuth
+    defl23 = point2.arc.deflection - defl12
+    point2.arc.lengthBack = defl12 * point2.arc.radiusStartVector.magnitude
+    point2.arc.lengthAhead = defl23 * point2.arc.radiusStartVector.magnitude
 
 def _assertFloatsEqual(f1, f2):
     '''Test whether two floats are approximately equal.
@@ -328,7 +355,12 @@ if __name__ == '__main__':
     compute_arc_parameters(p1, p2, p3)
     expected = ExtendedPoint(1,1)
     _assertPointsEqualXY(p2.arc.curveCenter, expected)
-    # actual = p2.arc.curveCenterPoint
-    # _assertPointsEqualXY(actual, expected)
+    expected = 1.0 / 9.0
+    _assertFloatsEqual(p2.arc.degreeCurve, expected)
+    expected = math.pi / 2.0
+    _assertFloatsEqual(p2.arc.deflection, expected)
+    expected = 9.0 * math.pi / 4.0
+    _assertFloatsEqual(p2.arc.lengthAhead, expected)
+    _assertFloatsEqual(p2.arc.lengthBack, expected)
 
     print 'tests complete.'
