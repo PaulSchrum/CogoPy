@@ -125,18 +125,16 @@ class Ray2D():
             raise IntersectionError()
         if otherRay.slope == float('inf'):
             newX = otherRay.extendedPoint.X
-            yInt = self.yIntercept
-            newY = self.slope * newX
+            newY = self.yIntercept + self.slope * newX
         elif self.slope == float('inf'):
             newX = self.extendedPoint.X
-            yInt = otherRay.yIntercept
-            newY = otherRay.slope * newX
+            newY = otherRay.yIntercept + otherRay.slope * newX
         else:
             yInt = self.yIntercept
-            newY = (otherRay.yIntercept - yInt) / \
-                 (otherRay.slope - self.slope)
-            newX = self.slope * newY
-        return ExtendedPoint(newX, yInt + newY)
+            newX = (otherRay.yIntercept - yInt) / \
+                 (self.slope - otherRay.slope)
+            newY = self.yIntercept + self.slope * newX
+        return ExtendedPoint(newX, newY)
 
     @staticmethod
     def get_bisecting_normal_ray(firstPt, otherPt):
@@ -149,7 +147,7 @@ class Ray2D():
             and ahead direction 90 degrees to the right of the line segment.
         '''
         if otherPt.pt2pt:
-            distBack = otherPt.pt2pt.distanceBack / 2.0
+            distBack = otherPt.pt2pt.distanceBack
         else:
             distBack = getDist2Points(firstPt, otherPt)
         az12 = getAzimuth(firstPt, otherPt)
@@ -203,8 +201,8 @@ def compute_arc_parameters(point1, point2, point3):
     point2.pt2pt = struct()
     point2.pt2pt.distanceBack = getDist2Points(point2, point1)
     point2.pt2pt.distanceAhead = getDist2Points(point3, point2)
-    azimuth12 = getAzimuth(point2, point1)
-    azimuth23 = getAzimuth(point3, point2)
+    azimuth12 = getAzimuth(point1, point2)
+    azimuth23 = getAzimuth(point2, point3)
     defl = azimuth23 - azimuth12
     if defl < 0.0:
         defl = defl + 2.0 * math.pi
@@ -227,12 +225,11 @@ def compute_arc_parameters(point1, point2, point3):
     # Answer to:
     # "Algorithm to find an arc, its center, radius and angles given 3 points"
 
-    # Get the ray bisecting secant12 and normal to it
+    # Get the ray bisecting and normal to secant12 and secant23
     biRay12 = Ray2D.get_bisecting_normal_ray(point1, point2)
-    halfVec12 = vectorFromDistanceAzimuth(point2.pt2pt.distanceBack / 2.0,
-                                          azimuth12)
-    midPoint12 = point1 + halfVec12
-    ray12ToCenter = Ray2D(midPoint12, azimuth12 + math.pi / 2.0)
+    biRay23 = Ray2D.get_bisecting_normal_ray(point2, point3)
+
+    point2.arc.curveCenter = biRay12.intersectWith(biRay23)
 
 def _assertFloatsEqual(f1, f2):
     '''Test whether two floats are approximately equal.
@@ -319,12 +316,18 @@ if __name__ == '__main__':
     _assertPointsEqualXY(aRay.extendedPoint, expected)
     expected = -1.0
     _assertFloatsEqual(aRay.slope, expected)
+    expected = 10
+    _assertFloatsEqual(aRay.yIntercept, expected)
 
-    p1 = ExtendedPoint(1.0, 10.0)
-    p2 = ExtendedPoint(8.8, 8.7)
-    p3 = ExtendedPoint(10.0, 1.0)
-    # compute_arc_parameters(p1, p2, p3)
-    expected = ExtendedPoint(1.0, 1.0)
+    # test creation of arc values from 3 points
+    # the attributes are added to pt2.
+    pt2Coord = (9.0 / math.sqrt(2.0)) + 1.0
+    p1 = ExtendedPoint(1,10)
+    p2 = ExtendedPoint(pt2Coord, pt2Coord)
+    p3 = ExtendedPoint(10,1)
+    compute_arc_parameters(p1, p2, p3)
+    expected = ExtendedPoint(1,1)
+    _assertPointsEqualXY(p2.arc.curveCenter, expected)
     # actual = p2.arc.curveCenterPoint
     # _assertPointsEqualXY(actual, expected)
 
