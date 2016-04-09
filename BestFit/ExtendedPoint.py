@@ -2,6 +2,7 @@
 
 """
 import math
+import collections
 
 class ExtendedPoint():
     """
@@ -70,6 +71,36 @@ class ExtendedPoint():
     @property
     def azimuth(self):
         return math.atan2(self.X, self.Y)
+
+    def deflectionTo(self, otherPt, preferredDir=None):
+        '''When interpreting both ExtendedPoints as Vectors, return the deflection
+        (in units of radians). Negative deflection is left.
+        :param otherPt: ExtendedPoint to be compared with for computation of deflection
+        :param longSolution: if True, compute deflection the long way around the circle
+        :return: a namedTuple of the interior solution azimuth and the exterior solution azimuth
+        :rtype: namedTuple AzimuthPair
+        '''
+        defl = otherPt.azimuth - self.azimuth
+        if defl < -1.0 * math.pi:
+            interiorDeflection = defl + 2 * math.pi
+            exteriorDeflection = defl
+        elif defl > math.pi:
+            interiorDeflection = defl - 2 * math.pi
+            exteriorDeflection = defl
+        else:
+            interiorDeflection = defl
+            if defl > 0.0:
+                exteriorDeflection = defl - 2 * math.pi
+            else:
+                exteriorDeflection = defl + 2 * math.pi
+        if preferredDir == None:
+            return AzimuthPair(interiorSolution = interiorDeflection,
+                                exteriorSolution = exteriorDeflection)
+        elif math.copysign(1, exteriorDeflection) == math.copysign(1, preferredDir):
+            return exteriorDeflection
+        return interiorDeflection
+
+AzimuthPair = collections.namedtuple('AzimuthPair', 'interiorSolution exteriorSolution')
 
 class struct():
     '''
@@ -206,6 +237,7 @@ def compute_arc_parameters(point1, point2, point3):
     """
     Computes all relevatnt parameters to the trio of points.
     Side Effects: The computed parameters are added to pt2.
+    Assumptions: Total arc deflection from point1 to point3 is less than 180 degrees.
     :param point1: Back point
     :param point2: Current point
     :param point3: Ahead point
@@ -245,12 +277,15 @@ def compute_arc_parameters(point1, point2, point3):
     biRay12 = Ray2D.get_bisecting_normal_ray(point1, point2)
     biRay23 = Ray2D.get_bisecting_normal_ray(point2, point3)
 
-    point2.arc.curveCenter = biRay12.intersectWith(biRay23)
+    cc = biRay12.intersectWith(biRay23)
+    point2.arc.curveCenter = cc
 
-    point2.arc.radiusStartVector = point2.arc.curveCenter - point1
-    point2.arc.radiusEndVector = point2.arc.curveCenter - point3
-    point2.arc.degreeCurve = 1.0 / point2.arc.radiusEndVector.magnitude
-    point2.arc.deflection = point2.arc.radiusEndVector.azimuth - point2.arc.radiusStartVector.azimuth
+    radStartV = cc - point1
+    point2.arc.radiusStartVector = radStartV
+    radEndV = cc - point3
+    point2.arc.radiusEndVector = radEndV
+    point2.arc.degreeCurve = 1.0 / radEndV.magnitude
+    point2.arc.deflection = radStartV.deflectionTo(radEndV, preferredDir=defl)
 
     p2Vector = point2.arc.curveCenter - point2
     defl12 = p2Vector.azimuth - point2.arc.radiusStartVector.azimuth
@@ -260,10 +295,10 @@ def compute_arc_parameters(point1, point2, point3):
 
 def _assertFloatsEqual(f1, f2):
     '''Test whether two floats are approximately equal.
-    The idea for the added message comes from
+    The idea for how to add the message comes from
     http://stackoverflow.com/a/3808078/1339950
     '''
-    customMessage = "{0} does not equal {1}".format(f1, f2)
+    customMessage = "{0} (Actual) does not equal {1} (Expected)".format(f1, f2)
     assert math.fabs(f1 - f2) < 0.000001, customMessage
 
 def _assertPointsEqualXY(p1, p2):
@@ -362,5 +397,17 @@ if __name__ == '__main__':
     expected = 9.0 * math.pi / 4.0
     _assertFloatsEqual(p2.arc.lengthAhead, expected)
     _assertFloatsEqual(p2.arc.lengthBack, expected)
+
+    # Test deflections which cross due north
+    p1 = ExtendedPoint(-1.0, 1.0)
+    p2 = ExtendedPoint(2, 2)
+    expected = AzimuthPair(math.pi / 2.0, -2 * math.pi + math.pi / 2.0)
+    az12 = p1.deflectionTo(p2)
+    _assertFloatsEqual(az12.interiorSolution, expected.interiorSolution)
+    _assertFloatsEqual(az12.exteriorSolution, expected.exteriorSolution)
+    az21 = p2.deflectionTo(p1)
+    expected = AzimuthPair(- expected[0], - expected[1])
+    _assertFloatsEqual(az21.interiorSolution, expected.interiorSolution)
+    _assertFloatsEqual(az21.exteriorSolution, expected.exteriorSolution)
 
     print 'tests complete.'
