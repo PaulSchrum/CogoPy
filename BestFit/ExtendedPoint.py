@@ -72,6 +72,20 @@ class ExtendedPoint():
     def azimuth(self):
         return math.atan2(self.X, self.Y)
 
+    def spatiallyEquals(self, other, tolerance=0.015):
+        """
+        Determines whether this and the other are at the same spatial
+        location within a certain tolerance
+        :param other: Other point to compare against
+        :param tolerance: Axis-based distance to compare for spatial equality
+        :return: True if the two points are within tolerance of each other on both axes.
+        """
+        if math.fabs(self.X -other.X) > tolerance:
+            return False
+        if math.fabs(self.Y - other.Y) > tolerance:
+            return False
+        return True;
+
     def deflectionTo(self, otherPt, preferredDir=None):
         '''When interpreting both ExtendedPoints as Vectors, return the deflection
         (in units of radians). Negative deflection is left.
@@ -108,6 +122,20 @@ class struct():
     This class exists as something to add attributes to dynamically.
     '''
     pass
+
+def any_in_point_equals_any_in_other(pointList, other, tolerance=0.005):
+    """
+    True if any point in pointList equals and point in other
+    :param pointList: iterable of Points
+    :param other: iterable of Points
+    :return: False or Tuple of matching indices
+    :rtype: False or Tuple
+    """
+    for index1, pt1 in enumerate(pointList):
+        for index2, pt2 in enumerate(other):
+            if pt1.spatiallyEquals(pt2, tolerance):
+                return (index1, index2)
+    return False
 
 class IntersectionError(Exception):
     def __init__(self):
