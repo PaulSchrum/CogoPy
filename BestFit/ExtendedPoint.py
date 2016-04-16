@@ -1,6 +1,17 @@
 """
+A module for determining circle-segment geometry when given
+three coplanar points.  The primary class, ExtendedPoint, simply
+carries the information about the defined circle segment after a call
+to compute_arc_parameters.
 
+Mini-Bibliography on computational geometry for circular segments:
+https://en.wikipedia.org/wiki/Circular_segment
+http://mathworld.wolfram.com/CircularSegment.html
+http://www.wsdot.wa.gov/publications/manuals/fulltext/M22-97/Chapter11.pdf
 """
+
+__author__ = 'Paul Schrum'
+
 import math
 import collections
 
@@ -17,6 +28,7 @@ class ExtendedPoint():
             arc.degreeCurve  (float) - degree of curve based on deflection
                 over 1 unit (meters or feet - on any Planar Coordinate
                 System) Derived by equation, set by method, not set by user
+            arc.radius (float) radius
             arc.curveCenterPoint (Point or Extended Point) - Circular curve center
                 point related to this point (self) as set by method call.
             arc.lengthBack (float) - distance along the arc back to the
@@ -28,6 +40,7 @@ class ExtendedPoint():
                 interpreted as radians.
             arc.radiusStartVector - vector from curve center to Point1 (begin point)
             arc.radiusEndVector - vector from curve center to Point3 (end point)
+            arc.chordVector - vector from point1 to point2
         pt2pt (object) - values related to the points as the vertex of
             a triangle.
             pt2pt.distanceBack (float) - chord distance to previous point
@@ -55,6 +68,30 @@ class ExtendedPoint():
                                                   self.Y,
                                                   self.magnitude,
                                                   self.azimuth)
+
+    def __str__(self):
+        mainString = '{0},{1}'.format(self.X, self.Y)
+
+        if self.pt2pt:
+            p2pString = """,{0},{1},{2}
+                """.format(cvt_radians_to_degrees(self.pt2pt.deflection),
+                           self.pt2pt.distanceBack,
+                           self.pt2pt.distanceAhead)
+            p2pString = "".join(p2pString.split())
+        else:
+            p2pString = ',,'
+
+        if self.arc:
+            arcString = """,{0},{1},{2},{3}
+            """.format(self.arc.degreeCurve100,
+                       self.arc.radius,
+                       cvt_radians_to_degrees(self.arc.deflection),
+                       cvt_radians_to_degrees(self.arc.chordVector.azimuth))
+            arcString = "".join(arcString.split())
+        else:
+            arcString = ',,,,'
+
+        return mainString + arcString + p2pString
 
     def __add__(self, other):
         return ExtendedPoint(self.X + other.X,
@@ -114,12 +151,20 @@ class ExtendedPoint():
             return exteriorDeflection
         return interiorDeflection
 
+    @staticmethod
+    def header_list():
+        return 'X,Y,Degree,Radius,ArcDeflection,ChordDirection,PointsDefl,DistanceBack,DistanceAhead'
+
 AzimuthPair = collections.namedtuple('AzimuthPair', 'interiorSolution exteriorSolution')
+
+def cvt_radians_to_degrees(rad):
+    return rad * 180.0 / math.pi
 
 class struct():
     '''
     Named for and serving a similar purpose as the C concept of Struct.
     This class exists as something to add attributes to dynamically.
+    (Python would not let me do this with Object, so struct.)
     '''
     pass
 
@@ -209,6 +254,11 @@ class Ray2D():
         return ExtendedPoint(newX, newY)
 
     @staticmethod
+    def get_csv_header_string():
+        return 'X,Y,ArcDeflection,DegreeCurve,DegreeCurveEnglish,' + \
+                'Radius,'
+
+    @staticmethod
     def get_bisecting_normal_ray(firstPt, otherPt):
         '''
         Given this point and another, return the ray which bisects the
@@ -261,6 +311,22 @@ def vectorFromDistanceAzimuth(length, az):
     dy = length * math.cos(az)
     return ExtendedPoint(dx, dy)
 
+def normalizeAzimuth(defl):
+    returnDef = defl
+    if defl < 0.0:
+        returnDef = defl + 2.0 * math.pi
+    elif defl > 2.0 * math.pi:
+        returnDef = defl - 2.0 * math.pi
+    return returnDef
+
+def normalizeDeflection(defl):
+    returnDef = defl
+    if defl < -2.0 * math.pi:
+        returnDef = defl + 2.0 * math.pi
+    elif defl > 2.0 * math.pi:
+        returnDef = defl - 2.0 * math.pi
+    return returnDef
+
 def compute_arc_parameters(point1, point2, point3):
     """
     Computes all relevatnt parameters to the trio of points.
@@ -276,15 +342,16 @@ def compute_arc_parameters(point1, point2, point3):
     point2.pt2pt.distanceAhead = getDist2Points(point3, point2)
     azimuth12 = getAzimuth(point1, point2)
     azimuth23 = getAzimuth(point2, point3)
-    defl = azimuth23 - azimuth12
-    if defl < 0.0:
-        defl = defl + 2.0 * math.pi
-    elif defl > 2.0 * math.pi:
-        defl = defl - 2.0 * math.pi
+    defl = normalizeDeflection(azimuth23 - azimuth12)
 
+    deflSign = 1
+    if defl < 0:
+        deflSign = -1
     point2.pt2pt.deflection = defl
 
     point2.arc = struct()
+    point2.arc.chordVector = point1 - point3
+    point2.arc.chordVector.azimuth = normalizeAzimuth(point2.arc.chordVector.azimuth)
     if defl == 0.0:
         point2.arc.degreeCurve = 0.0
         point2.arc.radius = float('inf')
@@ -309,10 +376,11 @@ def compute_arc_parameters(point1, point2, point3):
     point2.arc.curveCenter = cc
 
     radStartV = cc - point1
+    point2.arc.radius = radStartV.magnitude
     point2.arc.radiusStartVector = radStartV
     radEndV = cc - point3
     point2.arc.radiusEndVector = radEndV
-    point2.arc.degreeCurve = 1.0 / radEndV.magnitude
+    point2.arc.degreeCurve = 1.0 / point2.arc.radius
     point2.arc.deflection = radStartV.deflectionTo(radEndV, preferredDir=defl)
 
     p2Vector = point2.arc.curveCenter - point2
@@ -320,6 +388,11 @@ def compute_arc_parameters(point1, point2, point3):
     defl23 = point2.arc.deflection - defl12
     point2.arc.lengthBack = defl12 * point2.arc.radiusStartVector.magnitude
     point2.arc.lengthAhead = defl23 * point2.arc.radiusStartVector.magnitude
+    point2.arc.length =point2.arc.lengthBack + point2.arc.lengthAhead
+    point2.arc.degreeCurve = deflSign / point2.arc.radius
+    point2.arc.degreeCurve100 = 100.0 * \
+                               cvt_radians_to_degrees(point2.arc.degreeCurve)
+
 
 def _assertFloatsEqual(f1, f2):
     '''Test whether two floats are approximately equal.
@@ -416,6 +489,8 @@ if __name__ == '__main__':
     p2 = ExtendedPoint(pt2Coord, pt2Coord)
     p3 = ExtendedPoint(10,1)
     compute_arc_parameters(p1, p2, p3)
+    someStr = str(p1)
+    someStr = str(p2)
     expected = ExtendedPoint(1,1)
     _assertPointsEqualXY(p2.arc.curveCenter, expected)
     expected = 1.0 / 9.0

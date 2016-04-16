@@ -13,7 +13,7 @@ import arcpy
 import collections
 from ExtendedPoint import ExtendedPoint
 from ExtendedPoint import any_in_point_equals_any_in_other
-
+from ExtendedPoint import compute_arc_parameters
 print 'finished imports'
 
 successList = []
@@ -56,28 +56,29 @@ def processFCforCogoAnalysis(fc, outputDir):
     confirmFCisPolyline(fc)
     outputFile = _generateOutputFileName(fc, outputDir)
     alignmentsList = getListOfAlignmentsAsPoints(fc)
-    # for alignment in alignmentsList:
-    #     processPointsForCogo(alignment)
-    #     writeToCSVfile(alignment, outputFile)
+    for alignment in alignmentsList:
+        processPointsForCogo(alignment)
+        writeToCSV(alignment, "points.csv")
     return outputFile
 
+def processPointsForCogo(listOfPoints):
+    for pt1, pt2, pt3 in zip(listOfPoints[:-2],
+                             listOfPoints[1:-1],
+                             listOfPoints[2:]):
+        compute_arc_parameters(pt1, pt2, pt3)
 
-def _writeToCSV(segmentList, fileName):
+
+def writeToCSV(pointList, fileName):
     """
-    Temp method.  Intended to be deleted before submittal.
-    write segmentList to csv file to assist in problem diagnosis.
-    :param segmentList:
+    :param pointList:
     :return:
     """
-    countr, id = -1, -1
     with open(fileName, 'w') as f:
-        f.write('OID,segId,X,Y\n')
-        for segment in segmentList:
-            countr = countr + 1
-            for pt in segment:
-                id = id + 1
-                writeStr = '{0},{1},{2},{3}\n'.format(id, countr, pt.X, pt.Y)
-                f.write(writeStr)
+        headerStr = ExtendedPoint.header_list()
+        f.write(headerStr + '\n')
+        for point in pointList:
+            writeStr = str(point)
+            f.write(writeStr + '\n')
     sys.exit()
 
 
@@ -88,6 +89,7 @@ def getListOfAlignmentsAsPoints(fc):
     :param fc: Feature Class to extract points from
     :return: List of List of Points. Each List of Points represents a single
             alignment.
+    :rtype: List of list of ExtendedPoints.
     """
     # Extract all of the segments into a list of segments.
     # Note: My understanding is that points within a given segment are
