@@ -20,6 +20,7 @@ class ExtendedPoint():
     Members:
         X - X value (float)
         Y - Y value (float)
+        ParentPK - Primary Key of parent object (may be None)
 
                   Note: Some members are not known until method
                       compute_arc_parameters is called.
@@ -53,7 +54,16 @@ class ExtendedPoint():
             Side Effect: All parameters are attached to the second
             ExtendedPoint parameter.
     """
-    def __init__(self, aPoint, newY=None):
+    def __init__(self, aPoint, newY=None, parentPK=None):
+        """
+        ctor for an Extnded Point
+        :param aPoint: anything with an X (float) and Y(float).
+                If it is a number, then newY must be define (also a number)
+        :param newY: If aPoint is really X(float), then newY is the Y (float)
+        :param parentPK: if desired, the primary key of the object that
+                owns this point
+        :return: None
+        """
         if newY is None:
             self.X = aPoint.X
             self.Y = aPoint.Y
@@ -62,6 +72,7 @@ class ExtendedPoint():
             self.Y = newY
         self.pt2pt = False
         self.arc = False
+        self._parentPK = parentPK
 
     def __repr__(self):
         return '{0}, {1}: Mag {2}  Az {3}'.format(self.X,
@@ -100,6 +111,10 @@ class ExtendedPoint():
     def __sub__(self, other):
         return ExtendedPoint(other.X - self.X,
                              other.Y - self.Y)
+
+    @property
+    def ParentPK(self):
+        return self._parentPK
 
     @property
     def magnitude(self):
@@ -513,4 +528,4 @@ if __name__ == '__main__':
     _assertFloatsEqual(az21.interiorSolution, expected.interiorSolution)
     _assertFloatsEqual(az21.exteriorSolution, expected.exteriorSolution)
 
-    print 'tests complete.'
+    print 'tests successfully completed.'

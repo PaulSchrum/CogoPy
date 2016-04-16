@@ -170,6 +170,7 @@ def _breakPolylinesIntoSegments(fc):
     segID = -1
     lines_cursor = arcpy.da.UpdateCursor(fc, ["SHAPE@", "OBJECTID"])
     for lines_row in lines_cursor:
+        oid = lines_row[1]
         aPolylineSegment = _PolylineSegment()
         segID = segID + 1
         aPolylineSegment.segID = segID
@@ -177,7 +178,7 @@ def _breakPolylinesIntoSegments(fc):
         for partIndex in range(geom.partCount):
             geomPart = geom.getPart(partIndex)
             for aPoint in geomPart:
-                aPolylineSegment.append(ExtendedPoint(aPoint))
+                aPolylineSegment.append(ExtendedPoint(aPoint, parentPK=oid))
         segmentList.append(aPolylineSegment)
     return segmentList
 
