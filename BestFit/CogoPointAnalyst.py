@@ -158,29 +158,28 @@ class _PolylineSegment(collections.deque):
         return self[0], self[-1]
 
 
-def _breakPolylinesIntoSegments(fc):
+def _breakPolylinesIntoSegments(fc, onlySoSelected=False):
     """
     Given a feature class (Polyline), returns all segments
     broken out as ExtendedPoints.
     :param fc: Feature Class to break into segments.
+    :param onlySoSelected: If true, only operate on selected items
     :return: deque of all segments in the feature class
-    :rtype: deque (of list of points)
+    :rtype: deque (of list of segments)
     """
-    segmentList = collections.deque()
-    segID = -1
+    #ToDo: implement onlyDoSelected=True
+    segmentDeque = collections.deque()
     lines_cursor = arcpy.da.UpdateCursor(fc, ["SHAPE@", "OBJECTID"])
     for lines_row in lines_cursor:
         oid = lines_row[1]
         aPolylineSegment = _PolylineSegment()
-        segID = segID + 1
-        aPolylineSegment.segID = segID
         geom = lines_row[0]
         for partIndex in range(geom.partCount):
             geomPart = geom.getPart(partIndex)
             for aPoint in geomPart:
                 aPolylineSegment.append(ExtendedPoint(aPoint, parentPK=oid))
-        segmentList.append(aPolylineSegment)
-    return segmentList
+        segmentDeque.append(aPolylineSegment)
+    return segmentDeque
 
 
 def _generateOutputFileName(seedName, outDir):
