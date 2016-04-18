@@ -20,10 +20,17 @@ successList = []
 
 
 def analyzePolylines(fcs, outDir, loadCSVtoFeatureClass=False):
+    try:
+        validate_or_create_outDir(outDir)
+    except:
+        print ("Unable to create output directory. No files processed.")
+
     for fc in fcs:
         try:
+            print "Now processing {0}".format(fc)
             csvName = processFCforCogoAnalysis(fc, outDir)
             successList.append(csvName)
+            print "File created: {0}".format(csvName)
         except NotPolylineError:
             print "{0} not processed because it " + \
                   "is not a Polyline Feature Class.".format(fc)
@@ -54,11 +61,11 @@ def processFCforCogoAnalysis(fc, outputDir):
     :return: the filename of the csv file that was saved (str)
     """
     confirmFCisPolyline(fc)
-    outputFile = _generateOutputFileName(fc, outputDir)
     alignmentsList = getListOfAlignmentsAsPoints(fc)
-    for alignment in alignmentsList:
+    for num, alignment in enumerate(alignmentsList):
+        outputFile = _generateOutputFileName(fc, num, outputDir)
         processPointsForCogo(alignment)
-        writeToCSV(alignment, "points.csv")
+        writeToCSV(alignment, outputFile)
     return outputFile
 
 def processPointsForCogo(listOfPoints):
@@ -76,11 +83,9 @@ def writeToCSV(pointList, fileName):
     with open(fileName, 'w') as f:
         headerStr = ExtendedPoint.header_list()
         f.write(headerStr + '\n')
-        for point in pointList:
+        for i, point in enumerate(pointList):
             writeStr = str(point)
             f.write(writeStr + '\n')
-    sys.exit()
-
 
 def getListOfAlignmentsAsPoints(fc):
     """
@@ -181,8 +186,7 @@ def _breakPolylinesIntoSegments(fc, onlySoSelected=False):
         segmentDeque.append(aPolylineSegment)
     return segmentDeque
 
-
-def _generateOutputFileName(seedName, outDir):
+def _generateOutputFileName(seedName, fileNumber, outDir):
     """
     Takes a feature class name and generates a .csv filename from it
     with the outDir path (instead of the original path).
@@ -190,7 +194,11 @@ def _generateOutputFileName(seedName, outDir):
     :param outDir: Directory to prepend to the seedName
     :rtype: str
     """
-    return outDir + '/' + os.path.basename(seedName) + '.csv'
+    if fileNumber > 0:
+        fn = str(fileNumber)
+    else:
+        fn = ""
+    return outDir + '/' + os.path.basename(seedName) + fn + '.csv'
 
 
 class NotPolylineError(TypeError):
@@ -211,10 +219,18 @@ def confirmFCisPolyline(fc):
     if desc.shapeType != 'Polyline':
         raise NotPolylineError
 
+def validate_or_create_outDir(outDir):
+    if not os.path.exists(outDir):
+        os.makedirs(outDir)
 
 if __name__ == '__main__':
     arcpy.env.workspace = r"C:\GISdata\SelectedRoads.gdb"
-    featureClasses = [r'C:\GISdata\SelectedRoads.gdb\LeesvilleRoadRaleigh']
+    featureClasses = [r'C:\GISdata\SelectedRoads.gdb\LeesvilleRoadRaleigh',
+                      r'C:\GISdata\SelectedRoads.gdb\CatesAvenue',
+                      r'C:\GISdata\SelectedRoads.gdb\DanAllenDrive',
+                      r'C:\GISdata\SelectedRoads.gdb\FaucetteDrive',
+                      r'C:\GISdata\SelectedRoads.gdb\MorrillDrive',
+                      ]
     outputDir = r"C:\GISdata\testOutput"
 
     analyzePolylines(featureClasses, outputDir, False)
