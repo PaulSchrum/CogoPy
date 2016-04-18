@@ -369,6 +369,7 @@ def compute_arc_parameters(point1, point2, point3):
     point2.arc.chordVector.azimuth = normalizeAzimuth(point2.arc.chordVector.azimuth)
     if defl == 0.0:
         point2.arc.degreeCurve = 0.0
+        point2.arc.degreeCurve100 = 0.0
         point2.arc.radius = float('inf')
         point2.arc.curveCenter = False
         point2.arc.lengthBack = False
