@@ -97,7 +97,7 @@ def getListOfAlignmentsAsPoints(fc):
     :rtype: List of list of ExtendedPoints.
     """
     # Extract all of the segments into a list of segments.
-    # Note: My understanding is that points within a given segment are
+    # Note: A key assumption is that points within a given segment are
     # already spatially ordered
     segmentList = _breakPolylinesIntoSegments(fc)
     # _writeToCSV(segmentList, 'segmentListDump.csv')
@@ -235,10 +235,3 @@ if __name__ == '__main__':
 
     analyzePolylines(featureClasses, outputDir, False)
 
-else:
-    featureClasses = sys.argv[1]
-    outputDir = sys.argv[2]
-    loadCSVsAsACheck = None
-    if len(sys.argv) > 3:
-        loadCSVsAsACheck = sys.argv[3]
-    analyzePolylines(featureClasses, outputDir, False)
