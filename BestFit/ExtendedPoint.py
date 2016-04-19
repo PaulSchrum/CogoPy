@@ -124,6 +124,15 @@ class ExtendedPoint():
     def azimuth(self):
         return math.atan2(self.X, self.Y)
 
+    def __hash__(self):
+        return self.X - self.Y + (self.X % 17)
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __eq__(self, other):
+        return self.spatiallyEquals(other, tolerance=0.0055)
+
     def spatiallyEquals(self, other, tolerance=0.015):
         """
         Determines whether this and the other are at the same spatial
@@ -444,6 +453,15 @@ if __name__ == '__main__':
     azmuth12 = getAzimuth(point1, point2)
     expected = 1.10714940556
     _assertFloatsEqual(azmuth12, expected)
+
+    #Test point equality and hashing.
+    point98 = ExtendedPoint(20.0, 25.0)
+    point99 = ExtendedPoint(20.01, 25.01)
+    _assertPointsEqualXY(point2, point98)
+    assert(point2 == point98)
+    assert(point2 != point99)
+    assert(point2.__hash__() == point98.__hash__())
+    assert(point2.__hash__() != point99.__hash__())
 
     # Test vector creation
     vec12 = vectorFromDistanceAzimuth(distance12, azmuth12)
