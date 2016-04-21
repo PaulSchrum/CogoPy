@@ -19,7 +19,7 @@ print 'finished imports'
 successList = []
 
 
-def analyzePolylines(fcs, outDir, loadCSVtoFeatureClass=False):
+def analyzePolylines(fcs, outDir, loadCSVtoFeatureClass=False,spatialRef=None):
     try:
         validate_or_create_outDir(outDir)
     except:
@@ -28,7 +28,7 @@ def analyzePolylines(fcs, outDir, loadCSVtoFeatureClass=False):
     for fc in fcs:
         try:
             print "Now processing {0}".format(fc)
-            csvName = processFCforCogoAnalysis(fc, outDir)
+            csvName = processFCforCogoAnalysis(fc, outDir, spatialRef=spatialRef)
             successList.append(csvName)
             print "File created: {0}".format(csvName)
         except NotPolylineError:
@@ -52,7 +52,7 @@ def analyzePolylines(fcs, outDir, loadCSVtoFeatureClass=False):
             arcpy.Delete_management(tempPoints)
 
 
-def processFCforCogoAnalysis(fc, outputDir):
+def processFCforCogoAnalysis(fc, outputDir, spatialRef=None):
     """
     Process a Polyline file to analyze its points, generating a csv file of
     the same name, but saved to the output Directory.
@@ -61,7 +61,7 @@ def processFCforCogoAnalysis(fc, outputDir):
     :return: the filename of the csv file that was saved (str)
     """
     confirmFCisPolyline(fc)
-    alignmentsList = getListOfAlignmentsAsPoints(fc)
+    alignmentsList = getListOfAlignmentsAsPoints(fc, spatialRef=spatialRef)
     for num, alignment in enumerate(alignmentsList):
         outputFile = _generateOutputFileName(fc, num, outputDir)
         processPointsForCogo(alignment)
@@ -87,7 +87,7 @@ def writeToCSV(pointList, fileName):
             writeStr = str(point)
             f.write(writeStr + '\n')
 
-def getListOfAlignmentsAsPoints(fc):
+def getListOfAlignmentsAsPoints(fc, spatialRef=None):
     """
     Given a feature class (believed to be Polyline), convert each
     contiguous line segment into an spatially ordered list of points.
@@ -99,7 +99,7 @@ def getListOfAlignmentsAsPoints(fc):
     # Extract all of the segments into a list of segments.
     # Note: A key assumption is that points within a given segment are
     # already spatially ordered
-    segmentList = _breakPolylinesIntoSegments(fc)
+    segmentList = _breakPolylinesIntoSegments(fc, spatialRef=spatialRef)
     # _writeToCSV(segmentList, 'segmentListDump.csv')
 
     alignmentList = []
@@ -163,7 +163,7 @@ class _PolylineSegment(collections.deque):
         return self[0], self[-1]
 
 
-def _breakPolylinesIntoSegments(fc, onlySoSelected=False):
+def _breakPolylinesIntoSegments(fc, spatialRef=None, onlyDoSelected=False):
     """
     Given a feature class (Polyline), returns all segments
     broken out as ExtendedPoints.
@@ -174,7 +174,7 @@ def _breakPolylinesIntoSegments(fc, onlySoSelected=False):
     """
     #ToDo: implement onlyDoSelected=True
     segmentDeque = collections.deque()
-    lines_cursor = arcpy.da.UpdateCursor(fc, ["SHAPE@", "OBJECTID"])
+    lines_cursor = arcpy.da.SearchCursor(fc, ["SHAPE@", "OBJECTID"], spatial_reference=spatialRef)
     for lines_row in lines_cursor:
         oid = lines_row[1]
         aPolylineSegment = _PolylineSegment()
@@ -214,7 +214,7 @@ def confirmFCisPolyline(fc):
     :raises: NotPolylineError
     """
     desc = arcpy.Describe(fc)
-    if not (desc.dataType == 'Shapefile' or desc.dataType == 'FeatureClass'):
+    if not (desc.dataType == 'ShapeFile' or desc.dataType == 'FeatureClass'):
         raise NotPolylineError
     if desc.shapeType != 'Polyline':
         raise NotPolylineError
@@ -231,7 +231,12 @@ if __name__ == '__main__':
                       r'C:\GISdata\SelectedRoads.gdb\FaucetteDrive',
                       r'C:\GISdata\SelectedRoads.gdb\MorrillDrive',
                       ]
+    neuseRiver = [r"C:\SourceModules\CogoPy\data\other\Neuse401.shp"]
     outputDir = r"C:\GISdata\testOutput"
 
-    analyzePolylines(featureClasses, outputDir, False)
+    analyzePolylines(neuseRiver,
+    # analyzePolylines(featureClasses,
+                     outputDir,
+                     loadCSVtoFeatureClass=False,
+                     spatialRef=None)
 
