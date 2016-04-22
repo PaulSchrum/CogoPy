@@ -40,16 +40,30 @@ def analyzePolylines(fcs, outDir, loadCSVtoFeatureClass=False,spatialRef=None):
             print "Unexpected error: {0}".format(e.message)
             raise
 
-    # if loadCSVtoFeatureClass:
-    if 1 == 0:
+    if loadCSVtoFeatureClass and len(successList) > 0:
         tempPoints = 'tempPoints___'
+        mxd = arcpy.mapping.MapDocument('CURRENT')
+        dataFrame = mxd.activeDataFrame
+        # lyrs = arcpy.mapping.ListLayers(mxd)
+        # for lyr in lyrs:
+        #     arcpy.AddMessage('Layer: {0}'.format(lyr))
+
         try:
             for csv in successList:
-                arcpy.MakeXYEventLayer_management(csv, 'X', 'Y', tempPoints)
-                newLayerName = os.path.basename(csv)
-                arcpy.PointsToLine_management(tempPoints, )
+                baseName = os.path.basename(csv)[:-4] + "_check"
+                newLayerName = arcpy.env.workspace + '/' + baseName
+                arcpy.MakeXYEventLayer_management(csv, 'X', 'Y',
+                                                  tempPoints,
+                                                  spatial_reference=spatialRef)
+                arcpy.PointsToLine_management(tempPoints, newLayerName)
+                layerObj = arcpy.mapping.Layer(newLayerName)
+                arcpy.mapping.AddLayer(dataFrame, layerObj, 'BOTTOM')
+                arcpy.AddMessage('Added Layer: {0}'.format(baseName))
         finally:
             arcpy.Delete_management(tempPoints)
+        del mxd
+    else:
+        arcpy.AddMessage('Loading test not requested.')
 
 
 def processFCforCogoAnalysis(fc, outputDir, spatialRef=None):
@@ -175,15 +189,18 @@ def _breakPolylinesIntoSegments(fc, spatialRef=None, onlyDoSelected=False):
     #ToDo: implement onlyDoSelected=True
     segmentDeque = collections.deque()
     lines_cursor = arcpy.da.SearchCursor(fc, ["SHAPE@", "OBJECTID"], spatial_reference=spatialRef)
-    for lines_row in lines_cursor:
-        oid = lines_row[1]
-        aPolylineSegment = _PolylineSegment()
-        geom = lines_row[0]
-        for partIndex in range(geom.partCount):
-            geomPart = geom.getPart(partIndex)
-            for aPoint in geomPart:
-                aPolylineSegment.append(ExtendedPoint(aPoint, parentPK=oid))
-        segmentDeque.append(aPolylineSegment)
+    try:
+        for lines_row in lines_cursor:
+            oid = lines_row[1]
+            aPolylineSegment = _PolylineSegment()
+            geom = lines_row[0]
+            for partIndex in range(geom.partCount):
+                geomPart = geom.getPart(partIndex)
+                for aPoint in geomPart:
+                    aPolylineSegment.append(ExtendedPoint(aPoint, parentPK=oid))
+            segmentDeque.append(aPolylineSegment)
+    finally:
+        del lines_cursor
     return segmentDeque
 
 def _generateOutputFileName(seedName, fileNumber, outDir):
