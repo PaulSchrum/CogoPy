@@ -1,3 +1,5 @@
+# Paul Schrum    Unity ID: ptschrum
+# Course Project for GIS 540
 """
 A module for determining circle-segment geometry when given
 three coplanar points.  The primary class, ExtendedPoint, simply
