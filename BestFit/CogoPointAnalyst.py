@@ -23,30 +23,28 @@ def analyzePolylines(fcs, outDir, loadCSVtoFeatureClass=False,spatialRef=None):
     try:
         validate_or_create_outDir(outDir)
     except:
-        print ("Unable to create output directory. No files processed.")
+        arcPrint("Unable to create output directory. No files processed.")
 
     for fc in fcs:
         try:
-            print "Now processing {0}".format(fc)
+            arcPrint("Now processing {0}".format(fc))
             csvName = processFCforCogoAnalysis(fc, outDir, spatialRef=spatialRef)
-            successList.append(csvName)
-            print "File created: {0}".format(csvName)
+            successList.extend(csvName)
+            arcPrint("File created: {0}".format(csvName))
+            arcPrint(" ")
         except NotPolylineError:
-            print "{0} not processed because it " + \
-                  "is not a Polyline Feature Class.".format(fc)
+            arcPrint("{0} not processed because it " + \
+                  "is not a Polyline Feature Class.".format(fc))
         except arcpy.ExecuteError:
-            print "Arc Error while processing Feature Class: {0}".format(fc)
+            arcPrint("Arc Error while processing Feature Class: {0}".format(fc))
         except Exception as e:
-            print "Unexpected error: {0}".format(e.message)
+            arcPrint("Unexpected error: {0}".format(e.message))
             raise
 
     if loadCSVtoFeatureClass and len(successList) > 0:
         tempPoints = 'tempPoints___'
         mxd = arcpy.mapping.MapDocument('CURRENT')
         dataFrame = mxd.activeDataFrame
-        # lyrs = arcpy.mapping.ListLayers(mxd)
-        # for lyr in lyrs:
-        #     arcpy.AddMessage('Layer: {0}'.format(lyr))
 
         try:
             for csv in successList:
@@ -55,15 +53,17 @@ def analyzePolylines(fcs, outDir, loadCSVtoFeatureClass=False,spatialRef=None):
                 arcpy.MakeXYEventLayer_management(csv, 'X', 'Y',
                                                   tempPoints,
                                                   spatial_reference=spatialRef)
+                arcpy.AddMessage('Attempting to Add Layer: {0}'.format(baseName))
                 arcpy.PointsToLine_management(tempPoints, newLayerName)
                 layerObj = arcpy.mapping.Layer(newLayerName)
                 arcpy.mapping.AddLayer(dataFrame, layerObj, 'BOTTOM')
                 arcpy.AddMessage('Added Layer: {0}'.format(baseName))
         finally:
             arcpy.Delete_management(tempPoints)
-        del mxd
+            del mxd
     else:
-        arcpy.AddMessage('Loading test not requested.')
+        arcpy.AddMessage('Loading check layers was not requested.')
+        arcpy.AddMessage(' ')
 
 
 def processFCforCogoAnalysis(fc, outputDir, spatialRef=None):
@@ -72,15 +72,17 @@ def processFCforCogoAnalysis(fc, outputDir, spatialRef=None):
     the same name, but saved to the output Directory.
     :param fc: Feature Class to be processed.
     :param outputDir: Output directory to put the resulting csv file in.
-    :return: the filename of the csv file that was saved (str)
+    :return: list of filename(s) of the csv file that was saved (str)
     """
     confirmFCisPolyline(fc)
+    returnList = []
     alignmentsList = getListOfAlignmentsAsPoints(fc, spatialRef=spatialRef)
     for num, alignment in enumerate(alignmentsList):
         outputFile = _generateOutputFileName(fc, num, outputDir)
+        returnList.append(outputFile)
         processPointsForCogo(alignment)
         writeToCSV(alignment, outputFile)
-    return outputFile
+    return returnList
 
 def processPointsForCogo(listOfPoints):
     for pt1, pt2, pt3 in zip(listOfPoints[:-2],
@@ -211,11 +213,14 @@ def _generateOutputFileName(seedName, fileNumber, outDir):
     :param outDir: Directory to prepend to the seedName
     :rtype: str
     """
+    seedName_ = seedName
+    if seedName.endswith('.shp'):
+        seedName_ = seedName[:-4]
     if fileNumber > 0:
         fn = str(fileNumber)
     else:
         fn = ""
-    return outDir + '/' + os.path.basename(seedName) + fn + '.csv'
+    return outDir + '/' + os.path.basename(seedName_) + fn + '.csv'
 
 
 class NotPolylineError(TypeError):
@@ -257,3 +262,7 @@ if __name__ == '__main__':
                      loadCSVtoFeatureClass=False,
                      spatialRef=None)
 
+
+def arcPrint(aString):
+    print aString
+    arcpy.AddMessage(aString)
