@@ -173,7 +173,7 @@ def getPointListFromSegmentList(segmentDeque):
     orderedSegments.append(currentSegment)
     firstSegment = currentSegment
     matchingSegment = True
-    while matchingSegment:
+    while matchingSegment: # Search right from firstSegment
         matchingSegment = False
         for i in xrange(len(segmentDeque)):
             matches = any_in_point_equals_any_in_other(currentSegment.endPoints,
@@ -190,6 +190,26 @@ def getPointListFromSegmentList(segmentDeque):
                 matchingSegment = True
                 break
             segmentDeque.rotate(-1)  # for performance since deque is a linked list
+
+    matchingSegment = True
+    currentSegment = firstSegment
+    while matchingSegment: # Search left from firstSegment
+        matchingSegment = False
+        for i in xrange(len(segmentDeque)):
+            matches = any_in_point_equals_any_in_other(currentSegment.endPoints,
+                                                       segmentDeque[0].endPoints)
+            if matches:
+                testSegment = segmentDeque.pop()
+                if matches[0] == 1:  # if current's end point is the match
+                    currentSegment.reverse()
+                if matches[1] == 0:  # if test's begin point is the match
+                    testSegment.reverse()
+                testSegment.pop() # eliminates duplicate point
+                orderedSegments.appendleft(testSegment)
+                currentSegment = testSegment
+                matchingSegment = True
+                break
+            segmentDeque.rotate(1)  # for performance since deque is a linked list
 
     # flatten all points to a single list
     # orderPoints = [pt for seg in orderedSegments for pt in seg]
