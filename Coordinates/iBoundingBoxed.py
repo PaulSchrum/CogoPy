@@ -5,7 +5,7 @@ Abstract base class for interface for all classes
 
 from abc import ABCMeta, abstractmethod
 
-class IBoundingBoxed:
+class IBoundingBoxed(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod

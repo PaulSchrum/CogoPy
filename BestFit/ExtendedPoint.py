@@ -17,7 +17,7 @@ __author__ = 'Paul Schrum'
 import math
 import collections
 
-class ExtendedPoint():
+class ExtendedPoint(object):
     """
     Members:
         X - X value (float)
@@ -148,6 +148,9 @@ class ExtendedPoint():
         if math.fabs(self.Y - other.Y) > tolerance:
             return False
         return True;
+
+    def distanceTo(self, otherPt):
+        return ((otherPt.X - self.X)** 2 + (otherPt.Y - self.Y)**2)** 0.5
 
     def deflectionTo(self, otherPt, preferredDir=None):
         '''When interpreting both ExtendedPoints as Vectors, return the deflection

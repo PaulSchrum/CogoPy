@@ -1,4 +1,14 @@
 from unittest import TestCase
+
+# Work around necessary to make PyCharm run all tests:
+import sys, os
+cwd = os.getcwd()
+aDir = cwd.split('\\')[-1]
+if aDir == 'CogoPy':
+    bestFitDir = cwd + '\\BestFit'
+    sys.path.append(bestFitDir)
+# end: Work around necessary to make PyCharm run all tests
+
 from PolylineSegment import PolylineSegment
 from ExtendedPoint import ExtendedPoint
 

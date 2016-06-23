@@ -1,6 +1,7 @@
 # unityID = ptschrum
 # Paul Schrum
 # GIS 540 Course Project
+
 import collections
 
 class PolylineSegment(collections.deque):

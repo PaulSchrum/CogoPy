@@ -83,11 +83,35 @@ class GenericAlignment(object):
             raise StationError(
                 "Station is not on region {0} of this alignment.".
                 format(region))
-        if distanceInto > regio.length:
+        if distanceInto > regio.length + self._TOLERANCE:
             raise StationError(
                 "Station is not on region {0} of this alignment.".
                 format(region))
-        return regio.beginStation - regio.trueBeginStation
+        return distanceInto + regio.trueBeginStation
+
+    @property
+    def _TOLERANCE(self):
+        return 0.0000001
+
+    def getStationRegion(self, trueStation):
+        if trueStation < 0:
+            raise StationError("Absolute Station may not be less than 0.0.")
+        # trueBeginStation
+        regionCount = 0
+        testIsTrue =  self._regionList[regionCount].absStaIsInMyRange(trueStation)
+        if trueStation > self.EndStation.trueStation:
+            raise StationError("Given Absolute Station is off end of alignment.")
+        while not testIsTrue:
+            regionCount += 1
+            testIsTrue =  self._regionList[regionCount].absStaIsInMyRange(trueStation)
+
+        sta = trueStation - self._regionList[regionCount].trueBeginStation
+        sta += self._regionList[regionCount].beginStation
+        return sta, regionCount+1
+
+        # except IndexError:
+        #     raise StationError("True Station is beyond end of alignment.")
+        return trueStation - self._regionList[regionCount].trueBeginStation, regionCount
 
     def validateStation(self, aStation):
         if not isinstance(aStation, Station):
@@ -120,6 +144,17 @@ class GenericAlignment(object):
             self._beginStation = bSta
             self._length = eSta - bSta
 
+    def getStationFromTrueStation(self, trueStation):
+        if trueStation < 0:
+            raise StationError("True station may not be less than 0.0.")
+        regNo = 0
+        for reg in self._regionList:
+            regNo += 1
+            if reg.absStaIsInMyRange(trueStation):
+                staVal = trueStation - reg.trueBeginStation + reg.beginStation
+                return Station(station=staVal, region=regNo, alignment=self)
+        raise StationError("True station is greater than alignment's trueEndStation")
+
 
 class _region():
     def __init__(self,
@@ -139,6 +174,13 @@ class _region():
     @property
     def length(self):
         return self.trueEndStation - self.trueBeginStation
+
+    def absStaIsInMyRange(self, aTrueStation):
+        if aTrueStation < self.trueBeginStation:
+            return False
+        elif aTrueStation > self.trueEndStation:
+            return False
+        return True
 
 class _regionList(list):
     def __init__(self, rListTuples):
